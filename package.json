@@ -1,0 +1,24 @@
+{
+  "name": "gungen",
+  "version": "1.0.0",
+  "description": "Generating random firearms.",
+  "main": "gungen.js",
+  "scripts": {
+    "test": "gungengo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DodgyMerchant/GunGen.git"
+  },
+  "keywords": [
+    "game",
+    "gun",
+    "generation"
+  ],
+  "author": "Dodgy_Merchant",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DodgyMerchant/GunGen/issues"
+  },
+  "homepage": "https://github.com/DodgyMerchant/GunGen#readme"
+}
