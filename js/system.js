@@ -1,5 +1,12 @@
 import { Enum, MyArray } from "./helpers.js";
-import { Gun, gunPart_Magazine } from "./parts.js";
+import {
+	AmmoContainer,
+	Gun,
+	gunPart,
+	gunPart_Magazine,
+	partSlot,
+	Round,
+} from "./parts.js";
 
 /**
  * gun calibers
@@ -44,6 +51,7 @@ export class SLOTTYPE extends Enum {
 
 	static ChargingHandleBack = new SLOTTYPE("charging handle back");
 	static ChargingHandleSide = new SLOTTYPE("charging handle side");
+	static Barrel = new SLOTTYPE("barrel");
 	/**
 	 * barrel muzzle threads for attaching supressors, shrouds, flashhiders and compensators.
 	 */
@@ -107,18 +115,35 @@ export class gunFactory {
 	 * create a new gun from
 	 * @param {string} model name of the gun model
 	 * @param {string | undefined} givenName given custom name of the gun, display priority
-	 * @param {boolean | undefined} renamable if the part is renamable
-	 * @param {gunPart[] | undefined} partsList list of gun parts that the system will try to connect
+	 * @param {boolean} renamable if the part is renamable
+	 * @param {gunPart[]} partsList list of gun parts that the system will try to connect
 	 * @returns {Gun}
 	 */
 	static newGun(
 		model,
 		givenName = undefined,
-		renamable = true,
-		partsList = []
+		renamable,
+		attachType,
+		partsList
 	) {
 		let slotList = [];
-		return gunFactory.assembleGun(model, givenName, renamable, slotList);
+
+		/**
+		 * @type {gunPart}
+		 */
+		let part;
+		for (let index = 0; index < partsList.length; index++) {
+			part = partsList[index];
+			slotList.push(new partSlot(part.attachType, part));
+		}
+
+		return gunFactory.assembleGun(
+			model,
+			givenName,
+			renamable,
+			attachType,
+			slotList
+		);
 	}
 
 	/**
@@ -129,8 +154,8 @@ export class gunFactory {
 	 * @param {partSlot[]} slotList list of slots
 	 * @returns {Gun}
 	 */
-	static assembleGun(model, givenName, renamable, slotList) {
-		return new Gun(model, givenName, renamable, slotList);
+	static assembleGun(model, givenName, renamable, attachType, slotList) {
+		return new Gun(model, givenName, renamable, attachType, slotList);
 	}
 
 	/**
@@ -150,11 +175,11 @@ export class gunFactory {
 	/**
 	 * attach a part to a slot
 	 * @param {partSlot} slot
-	 * @param {gunPart} child
+	 * @param {gunPart} part
 	 * @return {boolean}
 	 */
-	static attach(slot, child) {
-		if (slot.attachType) slot.attach(child);
+	static attach(slot, part) {
+		if (this.attachCheck(slot, part)) return slot.attach(part);
 	}
 
 	/**
@@ -164,6 +189,65 @@ export class gunFactory {
 	 * @returns {boolean}
 	 */
 	static attachCheck(slot, part) {
-		return;
+		return slot.attachType == part.attachType;
 	}
+
+	/**
+	 * returns type of argument given as a string
+	 * @param {any} check
+	 * @return {"null"|"array"|"object"}
+	 */
+	static is(val) {
+		if (typeof val === "object") if (val == null) return "null";
+		if (Array.isArray(val)) return "array";
+		return "object";
+	}
+
+	//#region ammo
+
+	/**
+	 * check if you can load ammo in
+	 * @param {object} target
+	 * @param {CALIBER} cal
+	 */
+	static loadCheck(target, cal) {
+		// console.log("check: ", target.caliber, cal, cal == target.caliber);
+		return target.contents.length < target.capacity && cal == target.caliber;
+	}
+
+	/**
+	 * @param {object} target
+	 * @param {Round | Round[] | AmmoContainer | gunPart} round
+	 * @returns {number} number of how many rounds contents, -1 == all given in list
+	 */
+	static loadAmmo(target, round) {
+		switch (this.is(round)) {
+			case "array":
+				if (!this.loadCheck(target, round[0].caliber)) break;
+				if (target.contents.length + round.length > target.capacity) {
+					//check can load
+					//check if too many bullets
+
+					let index;
+					for (index = 0; target.contents.length < target.capacity; index++) {
+						target.contents.push(round[index]);
+					}
+					return index;
+				} else {
+					target.contents.push(...round);
+					return -1;
+				}
+			case "object":
+				if (round instanceof Round) {
+					if (this.loadCheck(target, round.caliber)) break;
+					target.contents.push(round);
+					return 1;
+				} else {
+					return this.loadAmmo(target, round.contents);
+				}
+		}
+		return 0;
+	}
+
+	//#endregion
 }

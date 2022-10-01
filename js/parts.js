@@ -1,12 +1,12 @@
-import { MyArray } from "./helpers.js";
+import { MyArray, MyMath } from "./helpers.js";
 import * as system from "./system.js";
 
 const ATTACH_LEVEL = 1;
 
 /**
  * @typedef {Object} RoundConfig
- * @property {system.CALIBER} caliber caliber
- * @property {system.ROUNDSTATES} state state
+ * @property {system.CALIBER} caliber caliber of the round
+ * @property {system.ROUNDSTATES} state state the round is in
  */
 /**
  * a round to shoot
@@ -38,11 +38,79 @@ export class Round {
 		}
 	}
 }
+/**
+ * a ammo container
+ */
+export class AmmoContainer {
+	/**
+	 * caliber of the barrel
+	 * @type {system.CALIBER}
+	 */
+	caliber;
+	/**
+	 * ammo capacity
+	 * @type {number}
+	 */
+	capacity;
+	/**
+	 * array of contents bullets
+	 * @type {Round[]}
+	 */
+	contents = [];
 
+	/**
+	 *
+	 * @param {system.CALIBER} caliber ammo caliber
+	 * @param {number} capacity ammo capacity
+	 * @param {Round[] | undefined | RoundConfig} contents ammo contents
+	 */
+	constructor(caliber, capacity, contents) {
+		this.caliber = caliber;
+		this.capacity = capacity;
+
+		if (contents && typeof contents === "object") {
+			if (Array.isArray(contents)) {
+				this.contents = contents;
+			} else {
+				for (let index = 0; index < capacity; index++) {
+					this.contents.push(new Round(contents));
+				}
+			}
+		} else this.contents = [];
+	}
+
+	toString() {
+		return `${this.caliber}\n ${this.contents.length}\n/${this.capacity}\n`;
+	}
+
+	/**
+	 * check if you can load ammo in
+	 * @param {system.CALIBER} cal
+	 */
+	loadCheck(cal) {
+		return system.gunFactory.loadCheck(this, cal);
+	}
+
+	/**
+	 *
+	 * @param {Round | Round[] | AmmoContainer} round
+	 * @returns {number} number of how many rounds contents, -1 == all given in list
+	 */
+	loadAmmo(round) {
+		return system.gunFactory.loadAmmo(this, round);
+	}
+}
+
+//#region slot
 /**
  * a slot to connect one part to another
  */
-class partSlot {
+export class partSlot {
+	/**
+	 * @type {gunPart}
+	 */
+	parent;
+
 	/**
 	 * type of attachment needed to connect
 	 * @type {system.SLOTTYPE}
@@ -55,7 +123,14 @@ class partSlot {
 	 */
 	child;
 
-	constructor(attachType, child) {
+	/**
+	 *
+	 * @param {gunPart} attachType parent to attach to
+	 * @param {system.SLOTTYPE} attachType type of attatchment type
+	 * @param {gunPart | undefined} child the child to attach, undefined if no child
+	 */
+	constructor(parent, attachType, child = undefined) {
+		this.parent = parent;
 		this.attachType = attachType;
 
 		if (child) {
@@ -65,9 +140,14 @@ class partSlot {
 
 	/**
 	 * detach connected child
+	 * @return {boolean}
 	 */
 	detach() {
+		this.child.triggerParentDettach(this.parent);
+		this.parent.triggerChildDettach(this.child);
 		this.child = undefined;
+
+		return true;
 	}
 
 	/**
@@ -75,15 +155,25 @@ class partSlot {
 	 * @param {gunPart} part
 	 */
 	attach(part) {
-		if (child) {
+		if (!this.child) {
 			this.child = part;
+			this.child.triggerParentAttach(this.parent);
+			this.parent.triggerChildAttach(this.child);
 			return true;
 		}
 		return false;
 	}
+
+	toString(simple = true) {
+		let str = this.child ? `\n${this.child}` : "\nempty slot";
+
+		if (simple) {
+			return `${str}`;
+		} else return `\nattachType: ${this.attachType}\n-- part > ${str}`;
+	}
 }
 
-class partRail extends partSlot {
+export class partRail extends partSlot {
 	/**
 	 * the connected gunparts
 	 * @type {gunPart[]}
@@ -106,11 +196,12 @@ class partRail extends partSlot {
 		//TODO attach part to rail
 	}
 }
-
+//#endregion slot
+//#region parts
 /**
  * abstract base gun part of a gun
  */
-class gunPart {
+export class gunPart {
 	/**
 	 * parent this gun part is attached to
 	 * @type {gunPart}
@@ -135,6 +226,8 @@ class gunPart {
 	 */
 	partSlotlist;
 
+	is = system.gunFactory.is;
+
 	/**
 	 * abstract base gun part of a gun
 	 * @param {gunPart} parent parent this gun part is attached to
@@ -157,11 +250,42 @@ class gunPart {
 	}
 
 	/**
+	 * triggered on:
+	 * a parent is now attached to THIS obj
+	 * THIS is a child
+	 * @param {gunPart} parent
+	 */
+	triggerParentAttach(parent) {}
+	/**
+	 * triggered on:
+	 * a parent was detached from THIS obj
+	 * THIS was a child
+	 * @param {gunPart} parent
+	 */
+	triggerParentDettach(parent) {}
+
+	/**
+	 * triggered on:
+	 * a child is now attached to THIS obj
+	 * THIS is a parent
+	 * @param {gunPart} child
+	 */
+	triggerChildAttach(child) {}
+	/**
+	 * triggered on:
+	 * a child was detached from THIS obj
+	 * THIS was a parent
+	 * @param {gunPart} parent
+	 */
+	triggerChildDettach(child) {}
+
+	/**
 	 * to string
+	 * @argument {boolean} simple simplified display
 	 * @returns {string}
 	 */
-	toString() {
-		return `parent: ${this.parent}\nmodel: ${this.model}`;
+	toString(simple = true) {
+		return `model: ${this.model}\nparent: ${this.parent}\nattachType: ${this.attachType}\npartSlotlist [ ${this.partSlotlist}]`;
 	}
 }
 
@@ -186,8 +310,15 @@ class gunPartNamed extends gunPart {
 	 * @param {string} givenName given custom name of the gun, display priority
 	 * @param {boolean} renamable
 	 */
-	constructor(parent, model, givenName, renamable = false, partSlotlist) {
-		super(parent, model, partSlotlist);
+	constructor(
+		parent,
+		model,
+		givenName,
+		renamable = false,
+		attachType,
+		partSlotlist
+	) {
+		super(parent, model, attachType, partSlotlist);
 
 		this.givenName = givenName;
 		this.renamable = renamable;
@@ -206,8 +337,8 @@ class gunPartNamed extends gunPart {
 		return this.nameStatus() ? this.givenName : this.model;
 	}
 
-	toString() {
-		super.toString() + `\ngivenName: ${this.givenName}`;
+	toString(simple = true) {
+		return super.toString(simple) + `\ngivenName: ${this.givenName}`;
 	}
 }
 /**
@@ -246,8 +377,12 @@ class gunPartGrab extends gunPart {
 }
 
 export class Gun extends gunPartNamed {
-	constructor(model, givenName, renamable, partSlotlist) {
-		super(undefined, model, givenName, renamable, partSlotlist);
+	/**
+	 *
+	 * @param {string} model model name
+	 */
+	constructor(model, givenName, renamable, attachType, partSlotlist) {
+		super(undefined, model, givenName, renamable, attachType, partSlotlist);
 	}
 }
 
@@ -286,16 +421,16 @@ export class gunPart_Magazine extends gunPartGrab {
 	 */
 	capacity;
 	/**
-	 * array of loaded bullets
+	 * array of contents bullets
 	 * @type {Round[]}
 	 */
-	array;
+	contents = [];
 
 	/**
 	 *
-	 * @param {system.CALIBER} caliber ammo capacity
+	 * @param {system.CALIBER} caliber ammo caliber
 	 * @param {number} capacity ammo capacity
-	 * @param {Round[] | undefined | RoundConfig} array ammo loaded
+	 * @param {Round[] | undefined | RoundConfig} contents ammo contents
 	 */
 	constructor(
 		parent,
@@ -305,60 +440,41 @@ export class gunPart_Magazine extends gunPartGrab {
 		grabSetup,
 		caliber,
 		capacity,
-		array
+		contents
 	) {
 		super(parent, model, attachType, partSlotlist, grabSetup);
 		this.caliber = caliber;
 		this.capacity = capacity;
 
-		if (array && typeof array === "object") {
-			if (Array.isArray(array)) {
-				this.array = array;
+		if (contents && typeof contents === "object") {
+			if (Array.isArray(contents)) {
+				this.contents = contents;
 			} else {
 				for (let index = 0; index < capacity; index++) {
-					new Round(array);
+					this.contents.push(new Round(contents));
 				}
 			}
-		} else this.array = [];
-	}
-
-	/**
-	 * check if you can load ammo in
-	 * @param {system.CALIBER} cal
-	 */
-	loadCheck(cal) {
-		return !(
-			this.array.length >= this.capacity ||
-			(cal && cal != this.caliber)
-		);
+		} else this.contents = [];
 	}
 
 	/**
 	 *
-	 * @param {Round | Round[]} round
-	 * @returns {number} number of how many rounds loaded, -1 == all given in list
+	 * @param {Round | Round[] | AmmoContainer | gunPart} round
+	 * @returns {number} number of how many rounds contents, -1 == all given in list
 	 */
 	load(round) {
-		//TODO caliber dont work
-		if (!this.loadCheck()) return 0;
-		//check if too many bullets
-		if (Array.isArray(round)) {
-			if (this.array.length + round.length > this.capacity) {
-				let index;
-				for (index = 0; this.array.length < this.capacity; index++) {
-					this.array.push(round[index]);
-				}
-				return index;
-			} else {
-				this.array.push(...round);
-				return -1;
-			}
-		} else {
-			this.array.push(round);
-			return 1;
-		}
+		return system.gunFactory.loadAmmo(this, round);
+	}
+
+	/**
+	 *
+	 * @returns {Round}
+	 */
+	extract() {
+		return this.contents.pop;
 	}
 }
+
 export class gunPart_Fireselector extends gunPart {
 	lockTrigger;
 
@@ -383,16 +499,56 @@ export class gunPart_Fireselector extends gunPart {
 	selectorList;
 }
 
-class gunPart_Extractor extends gunPart {
+export class gunPart_Extractor extends gunPart {
+	/**
+	 * @param {gunPart_Top} parent
+	 */
 	constructor(parent, model, attachType, partSlotlist) {
 		super(parent, model, attachType, partSlotlist);
 	}
-
 	/**
 	 * caliber of the barrel
 	 * @type {system.CALIBER}
 	 */
 	caliber;
+
+	/**
+	 * source of ammunition
+	 * @type {gunPart_Magazine}
+	 */
+	source;
+
+	/**
+	 * @type {Round}
+	 */
+	heldRound;
+
+	extract() {
+		if (!this.source || this.heldRound != undefined) return;
+
+		if (this.calCheck(this.source.caliber))
+			this.heldRound = this.source.extract();
+	}
+
+	/**
+	 *
+	 * @returns eject held round
+	 */
+	eject() {
+		if (!this.heldRound) return null;
+		let round = this.heldRound;
+		this.heldRound = undefined;
+		return round;
+	}
+
+	/**
+	 *
+	 * @param {CALIBER} cal
+	 * @returns {boolean}
+	 */
+	calCheck(cal) {
+		return this.caliber == cal;
+	}
 }
 
 /**
@@ -412,6 +568,19 @@ class gunPart_Top extends gunPart {
 	springLoaded;
 
 	/**
+	 * position of the top.
+	 * 0 being fully pulled back.
+	 * 1 being fully pushed forward
+	 * @type {number | 0 | 1}
+	 */
+	position = 1;
+
+	/**
+	 *
+	 */
+	feedPosition = 0.2;
+
+	/**
 	 *
 	 * @param {number} RPM
 	 * @param {boolean} blowback
@@ -420,6 +589,20 @@ class gunPart_Top extends gunPart {
 	constructor(blowback, springLoaded) {
 		this.blowback = blowback;
 		this.springLoaded = springLoaded;
+	}
+
+	setPosition(value) {
+		let oldPos = this.position;
+		this.position = MyMath.clamp(value, 0, 1);
+
+		if (oldPos < this.feedPosition || this.position >= this.feedPosition) {
+			console.log("EXTRACT ROUND");
+		} else if (
+			oldPos > this.feedPosition ||
+			this.position <= this.feedPosition
+		) {
+			console.log("EJECT ROUND");
+		}
 	}
 }
 export class gunPart_Bolt extends gunPart_Top {
@@ -450,3 +633,5 @@ export class gunPart_ChargingHandle extends gunPart_Top {
 
 	folding;
 }
+
+//#endregion parts

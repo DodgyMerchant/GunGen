@@ -39,6 +39,19 @@ export class Enum {
 		this.name = name;
 	}
 	toString() {
-		return this.name;
+		return `"${this.name}"`;
+	}
+}
+
+export class MyMath {
+	/**
+	 * restricts a number to a range defined by min and max
+	 * @param {number} number number to be restricted
+	 * @param {number} min minimum floor if the numbers range
+	 * @param {number} max maximum of the numbers range
+	 * @returns {number}
+	 */
+	static clamp(number, min, max) {
+		return Math.max(min, Math.min(number, max));
 	}
 }
