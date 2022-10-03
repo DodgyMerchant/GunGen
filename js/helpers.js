@@ -26,10 +26,16 @@ export class MyArray {
 
 export class Enum {
 	/**
-	 * simple name
+	 * must be a unique sting
 	 * @type {string}
 	 */
 	name;
+
+	/**
+	 * all enums created
+	 * @type {!Enum}
+	 */
+	static enums = [];
 
 	/**
 	 * make an enum
@@ -37,7 +43,24 @@ export class Enum {
 	 */
 	constructor(name) {
 		this.name = name;
+		this.constructor.enums.push(this);
 	}
+
+	/**
+	 * find an enum by its name
+	 * @param {string} nameFind name to search for
+	 * @returns
+	 */
+	static find(nameFind) {
+		/** @type {!Enum} */
+		let entry;
+		for (let i = 0; i < this.enums.length; i++) {
+			entry = this.enums[i];
+			if (entry.name == nameFind) return entry;
+		}
+		return null;
+	}
+
 	toString() {
 		return `"${this.name}"`;
 	}
@@ -55,3 +78,14 @@ export class MyMath {
 		return Math.max(min, Math.min(number, max));
 	}
 }
+
+/*
+function getAnyClass(obj) {
+	if (typeof obj === "undefined") return "undefined";
+	if (obj === null) return "null";
+	return obj.constructor;
+}
+
+
+
+*/

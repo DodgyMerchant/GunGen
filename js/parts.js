@@ -4,9 +4,9 @@ import * as system from "./system.js";
 const ATTACH_LEVEL = 1;
 
 /**
- * @typedef {Object} RoundConfig
- * @property {system.CALIBER} caliber caliber of the round
- * @property {system.ROUNDSTATES} state state the round is in
+ * @typedef {object} RoundConfig config object for a Round Object
+ * @property {system.CALIBER | string} caliber caliber of the round
+ * @property {system.ROUNDSTATES | string} [state] state the round is in
  */
 /**
  * a round to shoot
@@ -34,7 +34,10 @@ export class Round {
 			this.state = state;
 		} else {
 			this.caliber = caliber.caliber;
-			this.state = caliber.state;
+			if (!caliber.state) this.state = system.ROUNDSTATES.Ready;
+			else {
+				this.state = caliber.state;
+			}
 		}
 	}
 }
@@ -102,11 +105,18 @@ export class AmmoContainer {
 }
 
 //#region slot
+
+/**
+ * @typedef {object} SlotConfig config object for a slot object
+ * @prop {system.SLOTTYPE | string} attachType type of attachment needed to connect
+ * @prop {object} cildConf child config object
+ */
 /**
  * a slot to connect one part to another
  */
 export class partSlot {
 	/**
+	 * parent object this object os attached to
 	 * @type {gunPart}
 	 */
 	parent;
@@ -123,18 +133,25 @@ export class partSlot {
 	 */
 	child;
 
+	// is = system.gunFactory.is;
+
 	/**
-	 *
-	 * @param {gunPart} attachType parent to attach to
-	 * @param {system.SLOTTYPE} attachType type of attatchment type
+	 * a attachment slot on another part.
+	 * Can replace 2nd parameter for a config obj
+	 * @param {gunPart} parent parent object this object os attached to
+	 * @param {system.SLOTTYPE | SlotConfig} attachType type of attatchment type
 	 * @param {gunPart | undefined} child the child to attach, undefined if no child
 	 */
 	constructor(parent, attachType, child = undefined) {
 		this.parent = parent;
-		this.attachType = attachType;
 
-		if (child) {
-			this.attach(child);
+		if (!attachType instanceof system.SLOTTYPE) {
+		} else {
+			this.attachType = attachType;
+
+			if (child) {
+				this.attach(child);
+			}
 		}
 	}
 
@@ -198,6 +215,13 @@ export class partRail extends partSlot {
 }
 //#endregion slot
 //#region parts
+
+/**
+ * @typedef {object} PartProp properties for the gunPart objects config Object
+ * @property {string} model name of the gun model
+ * @property {string | system.SLOTTYPE} attachType compatable attachment types
+ * @property {PartDef[]} partSlotlist the parts that make up the gun
+ */
 /**
  * abstract base gun part of a gun
  */
@@ -226,19 +250,16 @@ export class gunPart {
 	 */
 	partSlotlist;
 
-	is = system.gunFactory.is;
-
 	/**
 	 * abstract base gun part of a gun
 	 * @param {gunPart} parent parent this gun part is attached to
-	 * @param {string} model name of the gun model
-	 * @param {partSlot[]} partSlotlist the parts that make up the gun
+	 * @param {PartProp} conf config objects
 	 */
-	constructor(parent, model, attachType, partSlotlist) {
+	constructor(parent, conf) {
 		this.parent = parent;
-		this.model = model;
-		this.attachType = attachType;
-		this.partSlotlist = partSlotlist;
+		this.model = conf.model;
+		this.attachType = conf.attachType;
+		this.partSlotlist = conf.partSlotlist;
 	}
 
 	/**
@@ -249,6 +270,7 @@ export class gunPart {
 		return this.model;
 	}
 
+	//#region trigger
 	/**
 	 * triggered on:
 	 * a parent is now attached to THIS obj
@@ -279,6 +301,13 @@ export class gunPart {
 	 */
 	triggerChildDettach(child) {}
 
+	//#endregion trigger
+
+	toJson() {
+		//TODO
+		let obj = {};
+	}
+
 	/**
 	 * to string
 	 * @argument {boolean} simple simplified display
@@ -289,6 +318,11 @@ export class gunPart {
 	}
 }
 
+/**
+ * @typedef {object} NamedProp properties for the gunPartNamed objects config Object
+ * @property {string} givenName given custom name of the gun, display priority
+ * @property {boolean} renamable if the part is renamable
+ */
 /**
  * named gunparts
  */
@@ -337,10 +371,11 @@ class gunPartNamed extends gunPart {
 		return this.nameStatus() ? this.givenName : this.model;
 	}
 
-	toString(simple = true) {
+	toString() {
 		return super.toString(simple) + `\ngivenName: ${this.givenName}`;
 	}
 }
+
 /**
  * part that is grabbable by the mouse in some way.
  */
@@ -409,9 +444,20 @@ export class gunPart_Barrel extends gunPart {
 	}
 }
 
-export class gunPart_Magazine extends gunPartGrab {
+/**
+ * @typedef {object} MagProp properties for the gunPart_Magazine objects config Object
+ * @property {string | system.CALIBER} caliber caliber enum name
+ * @property {number} capacity ammo capacity
+ * @property {Round[] | RoundConfig[] | RoundConfig | undefined} contents array of contents bullets
+ *
+ * @typedef {MagProp & PartProp} MagConf the gunPart_Magazine objects config object
+ */
+/**
+ * a magazine for a gun
+ */
+export class gunPart_Magazine extends gunPart {
 	/**
-	 * caliber of the barrel
+	 * caliber
 	 * @type {system.CALIBER}
 	 */
 	caliber;
@@ -427,34 +473,38 @@ export class gunPart_Magazine extends gunPartGrab {
 	contents = [];
 
 	/**
-	 *
-	 * @param {system.CALIBER} caliber ammo caliber
-	 * @param {number} capacity ammo capacity
-	 * @param {Round[] | undefined | RoundConfig} contents ammo contents
+	 * make a mag
+	 * @param {gunPart} parent parent this gun part is attached to
+	 * @param {MagConf} conf config objects
 	 */
-	constructor(
-		parent,
-		model,
-		attachType,
-		partSlotlist,
-		grabSetup,
-		caliber,
-		capacity,
-		contents
-	) {
-		super(parent, model, attachType, partSlotlist, grabSetup);
-		this.caliber = caliber;
-		this.capacity = capacity;
+	constructor(parent, conf) {
+		super(parent, conf);
+		this.caliber = conf.caliber;
+		this.capacity = conf.capacity;
 
-		if (contents && typeof contents === "object") {
-			if (Array.isArray(contents)) {
-				this.contents = contents;
-			} else {
-				for (let index = 0; index < capacity; index++) {
-					this.contents.push(new Round(contents));
-				}
+		let cont = conf.contents;
+		if (cont)
+			//check type of arguemnt
+			switch (system.gunFactory.is(cont)) {
+				case "object":
+					//one config obj
+					for (let index = 0; index < conf.capacity; index++) {
+						this.contents.push(new Round(cont));
+					}
+					break;
+				case "array":
+					//list of bullet objects
+					if (cont[0] instanceof Round) this.contents = cont;
+					// list filled with configs
+					else
+						for (let i = 0; i < cont.length; i++) {
+							this.contents.push(new Round(cont[i]));
+						}
+					break;
+				default:
+					// this.contents = [];
+					break;
 			}
-		} else this.contents = [];
 	}
 
 	/**
@@ -551,6 +601,15 @@ export class gunPart_Extractor extends gunPart {
 	}
 }
 
+//#region top
+
+/**
+ * @typedef {object} TopProp properties for the gunPart_Top objects config Object.
+ * @property {boolean} blowback if the bolt/slide will be pushed back to chamber another round. only if auto loading.
+ * @property {boolean} springLoaded if the bolt will push forward when in a backwar position.
+ * @property {number | 0 | 1} [position] position of the top. 0 being fully pulled back. 1 being fully pushed forward.
+ * @property {number} feedPosition procentual value of the feed position of the extractor
+ */
 /**
  * parent for slide and bolt
  */
@@ -558,37 +617,41 @@ class gunPart_Top extends gunPart {
 	/**
 	 * if the bolt/slide will be pushed back to chamber another round.
 	 * only if auto loading.
+	 * @type {boolean}
 	 */
 	blowback;
 
 	/**
 	 * if the bolt will push forward when in a backwar position.
-	 * always true if blowback.
+	 * @type {boolean}
 	 */
 	springLoaded;
 
 	/**
 	 * position of the top.
 	 * 0 being fully pulled back.
-	 * 1 being fully pushed forward
+	 * 1 being fully pushed forward.
 	 * @type {number | 0 | 1}
 	 */
 	position = 1;
 
 	/**
-	 *
+	 * procentual value of the feed position of the extractor
+	 * @type {number}
 	 */
 	feedPosition = 0.2;
 
 	/**
-	 *
-	 * @param {number} RPM
-	 * @param {boolean} blowback
-	 * @param {boolean} springLoaded
+	 * @param {gunPart} parent parent this gun part is attached to
+	 * @param {TopProp} conf config objects
 	 */
-	constructor(blowback, springLoaded) {
-		this.blowback = blowback;
-		this.springLoaded = springLoaded;
+	constructor(parent, conf) {
+		super(parent, conf);
+
+		this.blowback = conf.blowback;
+		this.springLoaded = conf.springLoaded;
+		this.position = conf.position;
+		this.feedPosition = conf.feedPosition;
 	}
 
 	setPosition(value) {
@@ -605,33 +668,82 @@ class gunPart_Top extends gunPart {
 		}
 	}
 }
+/**
+ * @typedef {object} BoltProp properties for the gunPart_Bolt objects config Object.
+ * @property {boolean} openBolt open or clodesed bolt
+ */
+/**
+ * reciprocating bolt
+ */
 export class gunPart_Bolt extends gunPart_Top {
 	/**
 	 * open or clodesed bolt
+	 * @type {boolean}
 	 */
-	open;
+	openBolt;
 
 	/**
 	 * pistol bolt
-	 * @param {boolean} open open or clodesed bolt
+	 * @param {gunPart} parent parent this gun part is attached to
+	 * @param {BoltProp} conf config objects
 	 */
-	constructor(blowback, springLoaded, open) {
+	constructor(parent, conf) {
 		super(blowback, springLoaded);
-		this.open = open;
+
+		this.openBolt = conf.openBolt;
 	}
 }
+/**
+ * @typedef {object} SlideProp properties for the gunPart_Slide objects config Object.
+ *
+ */
+/**
+ * top slide of gun
+ */
 export class gunPart_Slide extends gunPart_Top {
-	constructor(blowback, springLoaded) {
-		super(blowback, springLoaded);
+	/**
+	 * pistol bolt
+	 * @param {gunPart} parent parent this gun part is attached to
+	 * @param {SlideProp} conf config objects
+	 */
+	constructor(parent, conf) {
+		super(parent, conf);
 	}
 }
+/**
+ * @typedef {object} ChargeHandleProp properties for the gunPart_ChargingHandle objects config Object.
+ * @property {boolean} reciprocating if the charging handle will move with the bolt.
+ * @property {boolean} folding small if not held.
+ */
+/**
+ * charging handle to pull
+ */
 export class gunPart_ChargingHandle extends gunPart_Top {
 	/**
 	 * if the charging handle will move with the bolt.
+	 * @type {boolean}
 	 */
 	reciprocating;
 
+	/**
+	 * small if not held.
+	 * @type {boolean}
+	 */
 	folding;
+
+	/**
+	 * pistol bolt
+	 * @param {gunPart} parent parent this gun part is attached to
+	 * @param {ChargeHandleProp} conf config objects
+	 */
+	constructor(parent, conf) {
+		super(parent, conf);
+
+		this.folding = conf.folding;
+		this.reciprocating = conf.reciprocating;
+	}
 }
+
+//#endregion top
 
 //#endregion parts
