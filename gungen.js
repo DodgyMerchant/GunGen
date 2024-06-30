@@ -64,6 +64,7 @@ let myFrame = System.GunFactory.Make_FramePistol(
 );
 
 console.log(myMag.contents.length, myExtractor.heldRound);
+console.log(myExtractor.source.child);
 myExtractor.Feed();
 console.log(myMag.contents.length, myExtractor.heldRound);
 myExtractor.Eject();

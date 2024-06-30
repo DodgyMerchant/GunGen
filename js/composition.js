@@ -164,9 +164,9 @@ export class Comp_BulletContainer {
   /**
    * extract one bullet
    */
-  Extract = () => {
+  Extract() {
     return this.contents.pop();
-  };
+  }
 }
 
 /**
@@ -212,7 +212,6 @@ export class Comp_BulletHolder {
    *
    */
   Feed = () => {
-    
     let ammoSource;
     if (this.source instanceof partSlot) ammoSource = this.source.child;
     else ammoSource = this.source;

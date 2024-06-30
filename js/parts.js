@@ -69,7 +69,6 @@ export class partSlot {
 
   /**
    * a attachment slot on another part.
-   * Can replace 2nd parameter for a config obj
    * @param {SlotConfig} config
    */
   constructor(config) {

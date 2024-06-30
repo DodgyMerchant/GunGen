@@ -53,14 +53,18 @@ export class GunFactory {
    * magazine, bullet container
    * @param {Parts.PartConf} partConf
    * @param {Components.CompBulContConf} containConf
-   * @returns {Magazine}
    */
   static Make_Magazine(partConf, containConf, attachConf) {
-    return {
+    let obj = {
+      ...new Components.Comp_BulletContainer(containConf),
       ...new Parts.gunPart(partConf),
       ...new Components.Comp_Attachable(attachConf),
-      ...new Components.Comp_BulletContainer(containConf),
     };
+
+    Object.bind;
+    Object.defineProperties;
+
+    return obj;
   }
 
   /**
