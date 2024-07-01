@@ -55,22 +55,24 @@ export class Comp_Named {
 /**
  * component for something containing bullets.
  */
-export class Comp_BulletContainer {
+export const Comp_BulletContainer = () => {
+  
+  return {
   /**
    * caliber
    * @type {CALIBER}
    */
-  caliber;
+  caliber,
   /**
    * ammo capacity
    * @type {number}
    */
-  capacity;
+  capacity,
   /**
    * array of contents bullets
    * @type {Round[]}
    */
-  contents = [];
+  contents : [],
 
   /**
    * make a mag
@@ -103,38 +105,39 @@ export class Comp_BulletContainer {
           // this.contents = [];
           break;
       }
-  }
+  },
+
 
   /**
    * check if capacity full.
    */
-  LoadCheckCap = () => {
+  LoadCheckCap(){
     return this.contents.length < this.capacity;
-  };
+  },
 
   /**
    * check caliber compatability.
    * @param {CALIBER} cal
    */
-  LoadCheckCal = (cal) => {
+  LoadCheckCal(cal){
     return cal == this.caliber;
-  };
+  },
 
   /**
    * check if you can load ammo in
    * @param {CALIBER} cal
    */
-  LoadCheck = (cal) => {
+  LoadCheck(cal){
     // console.log("check: ", this.caliber, cal, cal == this.caliber);
     return this.LoadCheckCap() && this.LoadCheckCal(cal);
-  };
+  },
 
   /**
    * load in ammo
    * @param {Round | Round[] | Parts.gunPart} round
    * @returns {number} number of how many rounds contents, -1 == all given in list
    */
-  LoadAmmo = (round) => {
+  LoadAmmo(round){
     switch (GunFactory.is(round)) {
       case "array":
         //check caliber
@@ -159,7 +162,7 @@ export class Comp_BulletContainer {
         }
     }
     return 0;
-  };
+  },
 
   /**
    * extract one bullet
@@ -167,7 +170,7 @@ export class Comp_BulletContainer {
   Extract() {
     return this.contents.pop();
   }
-}
+}}
 
 /**
  * @typedef {object} CompBulletHoldConf grabbable config obj.
