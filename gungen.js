@@ -63,41 +63,42 @@ let myFrame = System.GunFactory.Make_FramePistol(
   }
 );
 
-console.log(myMag.contents.length, myExtractor.heldRound);
-console.log(myExtractor.source.child);
-myExtractor.Feed();
-console.log(myMag.contents.length, myExtractor.heldRound);
-myExtractor.Eject();
-myMag.Detach();
-myExtractor.Feed();
-console.log(myMag.contents.length, myExtractor.heldRound);
+// console.log(myMag.contents.length, myExtractor.heldRound);
+// console.log(myExtractor.source.child);
+// myExtractor.Feed();
+// console.log(myMag.contents.length, myExtractor.heldRound);
+// myExtractor.Eject();
+// myMag.Detach();
+// myExtractor.Feed();
+// console.log(myMag.contents.length, myExtractor.heldRound);
 
-let i = 0;
+const eater = (state) => ({
+  canEat: true,
+  eat(amount) {
+    console.log(state.name + " is eating");
+    state.energy += amount;
+  },
+});
 
-class Test1 {
-  test1 = 0;
-  test12 = 0;
-  constructor(num) {
-    this.test1 = num;
-    this.test12 = num;
+class Dog {
+  name;
+  energy;
+  breed;
+  constructor(name, energy, breed) {
+    this.name = name;
+    this.energy = energy;
+    this.breed = breed;
   }
 }
-class Test2 {
-  test2 = 0;
-  constructor(num) {
-    this.test2 = num;
-  }
-}
 
-let obj = {
-  ...new Test1(1),
-  ...new Test2(3),
+/**
+ * class + obj
+ */
+const make_dog = (name, energy, breed) => {
+  let _dog = new Dog(name, energy, breed);
+  return Object.assign(_dog, eater(_dog));
 };
 
-let str = "";
-if (obj instanceof Test1) str = "Is Test1";
-else str = "Is NOT Test1";
-console.log(str);
-if (obj instanceof Test2) str = "Is Test2";
-else str = "Is NOT Test2";
-console.log(str);
+let leo = make_dog("Leo1", 10, "Pug");
+leo.eat(10);
+console.log(leo);
