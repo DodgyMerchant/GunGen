@@ -164,9 +164,9 @@ export class Comp_BulletContainer {
   /**
    * extract one bullet
    */
-  Extract() {
+  Extract = () => {
     return this.contents.pop();
-  }
+  };
 }
 
 /**

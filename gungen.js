@@ -63,42 +63,10 @@ let myFrame = System.GunFactory.Make_FramePistol(
   }
 );
 
-// console.log(myMag.contents.length, myExtractor.heldRound);
-// console.log(myExtractor.source.child);
-// myExtractor.Feed();
-// console.log(myMag.contents.length, myExtractor.heldRound);
-// myExtractor.Eject();
-// myMag.Detach();
-// myExtractor.Feed();
-// console.log(myMag.contents.length, myExtractor.heldRound);
-
-const eater = (state) => ({
-  canEat: true,
-  eat(amount) {
-    console.log(state.name + " is eating");
-    state.energy += amount;
-  },
-});
-
-class Dog {
-  name;
-  energy;
-  breed;
-  constructor(name, energy, breed) {
-    this.name = name;
-    this.energy = energy;
-    this.breed = breed;
-  }
-}
-
-/**
- * class + obj
- */
-const make_dog = (name, energy, breed) => {
-  let _dog = new Dog(name, energy, breed);
-  return Object.assign(_dog, eater(_dog));
-};
-
-let leo = make_dog("Leo1", 10, "Pug");
-leo.eat(10);
-console.log(leo);
+console.log(myMag.contents.length, myExtractor.heldRound);
+myExtractor.Feed();
+console.log(myMag.contents.length, myExtractor.heldRound);
+myExtractor.Eject();
+myMag.Detach();
+myExtractor.Feed();
+console.log(myMag.contents.length, myExtractor.heldRound);

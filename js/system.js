@@ -55,18 +55,9 @@ export class GunFactory {
    * @param {Components.CompBulContConf} containConf
    */
   static Make_Magazine(partConf, containConf, attachConf) {
-
-    
-
-    let obj = new Parts.gunPart(partConf);
-    return Object.assign(obj,
-      eater(obj),
-    );
-
-
     let obj = {
-      ...new ,
-      ...Components.Comp_BulletContainer(containConf),
+      ...new Parts.gunPart(partConf),
+      ...new Components.Comp_BulletContainer(containConf),
       ...new Components.Comp_Attachable(attachConf),
     };
 
