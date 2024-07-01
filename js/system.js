@@ -19,10 +19,8 @@ export class GunFactory {
    * @returns {FrameGeneral}
    */
   static Make_FrameGeneral(partConf, attHostConf) {
-    return {
-      ...new Parts.gunPart(partConf),
-      ...new Components.Comp_AttachHost(attHostConf),
-    };
+    let obj = new Parts.gunPart(partConf);
+    return Object.assign(obj, Components.Comp_AttachHost(obj, attHostConf));
   }
 
   /**
@@ -37,17 +35,14 @@ export class GunFactory {
    * @returns {FramePistol}
    */
   static Make_FramePistol(partConf, attHostConf, grabConf) {
-    let frame = GunFactory.Make_FrameGeneral(partConf, attHostConf);
-    return {
-      ...frame,
-      ...new Components.Comp_Grabbable(grabConf),
-    };
+    let obj = GunFactory.Make_FrameGeneral(partConf, attHostConf);
+    return Object.assign(obj, Components.Comp_Grabbable(obj, grabConf));
   }
 
   /**
    * @typedef {Parts.gunPart &
-   * Components.Comp_BulletContainer &
-   * Components.Comp_Attachable} Magazine Magazine for a gun
+   * Components.CompBulletContainer &
+   * Components.CompAttachable} Magazine Magazine for a gun
    */
   /**
    * magazine, bullet container
@@ -55,18 +50,13 @@ export class GunFactory {
    * @param {Components.CompBulContConf} containConf
    */
   static Make_Magazine(partConf, containConf, attachConf) {
-    let obj = {
-      ...new Parts.gunPart(partConf),
-      ...new Components.Comp_BulletContainer(containConf),
-      ...new Components.Comp_Attachable(attachConf),
-    };
-
-    return obj;
+    let obj = new Parts.gunPart(partConf);
+    return Object.assign(obj, Components.Comp_BulletContainer(obj, containConf), Components.Comp_Attachable(obj, attachConf));
   }
 
   /**
-   * @typedef {Parts.gunPart & Components.Comp_Attachable &
-   * Components.Comp_BulletHolder} Extractor base pistol frame
+   * @typedef {Parts.gunPart & Components.CompAttachable &
+   * Components.CompBulletHolder} Extractor base pistol frame
    */
   /**
    * Extractor that grabs bullets!
@@ -76,11 +66,8 @@ export class GunFactory {
    * @returns {Extractor}
    */
   static Make_Extractor(partConf, attachConf, bHoldConf) {
-    return {
-      ...new Parts.gunPart(partConf),
-      ...new Components.Comp_Attachable(attachConf),
-      ...new Components.Comp_BulletHolder(bHoldConf),
-    };
+    let obj = new Parts.gunPart(partConf);
+    return Object.assign(obj, Components.Comp_Attachable(obj, attachConf), Components.Comp_BulletHolder(obj, bHoldConf));
   }
 
   //#endregion make

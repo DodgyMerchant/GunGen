@@ -1,4 +1,4 @@
-import { Comp_AttachHost, Comp_Attachable, Comp_BulletContainer } from "./composition.js";
+import { Comp_AttachHost } from "./composition.js";
 import { CALIBER, FIREMODE, ROUNDSTATES, SLOTTYPE } from "./enums.js";
 import { MyArray, MyMath } from "./helpers.js";
 import { GunFactory } from "./system.js";
@@ -41,7 +41,7 @@ export class Round {
 /**
  * @typedef {object} SlotConfig config object for a slot object
  * @prop {Comp_AttachHost | undefined} parent parent object this object os attached to
- * @prop {Comp_Attachable | undefined} child the child to attach, undefined if no child
+ * @prop {import("./composition.js").CompAttachable | undefined} child the child to attach, undefined if no child
  * @prop {SLOTTYPE | undefined} attachType type of attachment needed to connect
  */
 /**
@@ -63,7 +63,7 @@ export class partSlot {
 
   /**
    * the connected part
-   * @type {Comp_Attachable | undefined}
+   * @type {import("./composition.js").CompAttachable | undefined }
    */
   child;
 
@@ -88,16 +88,20 @@ export class partSlot {
   }
 
   /**
-   * detach connected child
-   * @param {Comp_Attachable} part
+   * detach connected child.
+   * perform this action from child.
+   * @param {import("./composition.js").CompAttachable} part
+   * @returns {boolean} is successful
    */
   detach(part) {
     this.child = undefined;
+    return true;
   }
 
   /**
    * set child variable to gunpart
-   * @param {Comp_Attachable} part
+   * perform this action from child.
+   * @param {}part
    * @returns {boolean} is successful
    */
   attach(part) {
@@ -106,6 +110,10 @@ export class partSlot {
       return true;
     }
     return false;
+  }
+
+  toString() {
+    return `slot: ${attachType}`;
   }
 }
 
@@ -168,8 +176,12 @@ export class gunPart {
     return this.model;
   }
 
+  toString() {
+    return `GunPart: ${this.model}`;
+  }
+
   toJson() {
-    //TODO
+    //TODO make to jason
     let obj = {};
   }
 }

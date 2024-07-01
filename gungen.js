@@ -62,11 +62,3 @@ let myFrame = System.GunFactory.Make_FramePistol(
     grabEnabled: true,
   }
 );
-
-console.log(myMag.contents.length, myExtractor.heldRound);
-myExtractor.Feed();
-console.log(myMag.contents.length, myExtractor.heldRound);
-myExtractor.Eject();
-myMag.Detach();
-myExtractor.Feed();
-console.log(myMag.contents.length, myExtractor.heldRound);
