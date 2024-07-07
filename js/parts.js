@@ -1,9 +1,7 @@
-import { Comp_AttachHost } from "./composition.js";
+import * as Components from "./composition.js";
 import { CALIBER, FIREMODE, ROUNDSTATES, SLOTTYPE } from "./enums.js";
-import { MyArray, MyMath } from "./helpers.js";
+import MyMath from "../myJS/MyMath.js";
 import { GunFactory } from "./system.js";
-
-const ATTACH_LEVEL = 1;
 
 /**
  * @typedef {object} RoundConfig config object for a Round Object
@@ -40,8 +38,8 @@ export class Round {
 
 /**
  * @typedef {object} SlotConfig config object for a slot object
- * @prop {Comp_AttachHost | undefined} parent parent object this object os attached to
- * @prop {import("./composition.js").CompAttachable | undefined} child the child to attach, undefined if no child
+ * @prop {Components.CompAttachHost | undefined} parent parent object this object os attached to
+ * @prop {Components.CompAttachable | undefined} child the child to attach, undefined if no child
  * @prop {SLOTTYPE | undefined} attachType type of attachment needed to connect
  */
 /**
@@ -51,7 +49,7 @@ export class Round {
 export class partSlot {
   /**
    * parent object this object os attached to
-   * @type {Comp_AttachHost | undefined}
+   * @type {import("./composition.js").CompAttachHost | undefined}
    */
   parent;
 
@@ -63,7 +61,7 @@ export class partSlot {
 
   /**
    * the connected part
-   * @type {import("./composition.js").CompAttachable | undefined }
+   * @type {Components.CompAttachable | undefined }
    */
   child;
 
@@ -88,28 +86,48 @@ export class partSlot {
   }
 
   /**
-   * detach connected child.
+   * set child variable to gunpart.
    * perform this action from child.
-   * @param {import("./composition.js").CompAttachable} part
+   * @param {Components.CompAttachable} part
    * @returns {boolean} is successful
    */
-  detach(part) {
-    this.child = undefined;
-    return true;
-  }
-
-  /**
-   * set child variable to gunpart
-   * perform this action from child.
-   * @param {}part
-   * @returns {boolean} is successful
-   */
-  attach(part) {
+  _attach(part) {
     if (!this.child) {
       this.child = part;
       return true;
     }
     return false;
+  }
+
+  /**
+   * detach connected child.
+   * perform this action from child.
+   * @param {Components.CompAttachable} part
+   * @returns {boolean} is successful
+   */
+  _detach(part) {
+    this.child = undefined;
+    return true;
+  }
+
+  /**
+   * perform attach on child and itself.
+   * @param {Components.CompAttachable} part part to detach
+   * @returns {boolean} is successful
+   */
+  Attach(part) {
+    if (!this.child) return false;
+    return this.child.Attach(part);
+  }
+
+  /**
+   * perform detatch on child and itself.
+   * @param {Components.CompAttachable} part part to detach
+   * @returns {boolean} is successful
+   */
+  Detach(part) {
+    if (!this.child) return false;
+    return this.child.Detach();
   }
 
   toString() {
@@ -128,19 +146,19 @@ export class partRail extends partSlot {
    * detach the part from the list
    * @param {gunPart} part part to detach
    */
-  detach(part) {
-    MyArray.remove(this.childList, part);
-    let a = { i: 0 };
-    a;
-  }
+  // _detach(part) {
+  //   MyArray.remove(this.childList, part);
+  //   let a = { i: 0 };
+  //   a;
+  // }
 
   /**
    * attach the part to the list
    * @param {gunPart} part part to detach
    */
-  attach(attach) {
-    //TODO attach part to rail
-  }
+  // _attach(attach) {
+  //   //TODO attach part to rail
+  // }
 }
 
 /**

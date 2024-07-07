@@ -3,58 +3,6 @@ import { Round, gunPart, partSlot } from "./parts.js";
 import { GunFactory } from "./system.js";
 
 /**
- * @typedef {object} CompNamedConf properties for the gunPartNamed objects config Object
- * @property {string} givenName given custom name of the gun, display priority
- * @property {boolean} renamable if the part is renamable
- */
-/**
- * @typedef {{
- * givenName: string;
- * renamable: boolean;
- * NameStatus(): boolean;
- * GetDisplayName(): any;
- * }} CompNamed component named gunparts
- */
-/**
- * component named gunparts
- *
- * make a namable part
- * @param {gunPart} state
- * @param {CompNamedConf} conf
- * @returns {CompNamed}
- */
-export const Comp_Named = (state, conf) => {
-  let obj = {
-    /**
-     * given custom name of the gun, display priority
-     * @type {string}
-     */
-    givenName: conf.givenName,
-
-    /**
-     * if the part is renamable
-     * @type {boolean}
-     */
-    renamable: conf.renamable,
-
-    /**
-     * returns if part is named
-     * @returns {boolean}
-     */
-    NameStatus() {
-      if (!this.givenName) return false;
-      return true;
-    },
-
-    GetDisplayName() {
-      return this.NameStatus() ? this.givenName : this.model;
-    },
-  };
-
-  return obj;
-};
-
-/**
  * @typedef {object} CompBulContConf the CompBulletContainer objects config object
  * @property {string | CALIBER} caliber caliber enum name
  * @property {number} capacity ammo capacity
@@ -336,11 +284,12 @@ export const Comp_Attachable = (state, conf) => {
      * @return {boolean} if attached successfully
      */
     Attach(target) {
-      if (!this.parent && target.attachType == this.attachType && target.attach(this)) {
-        this.parent = target;
-        target.attach(this);
-        return true;
-      }
+      if (!this.parent && target.attachType == this.attachType)
+        if (target._attach(this)) {
+          this.parent = target;
+          target._attach(this);
+          return true;
+        }
 
       return false;
     },
@@ -349,7 +298,7 @@ export const Comp_Attachable = (state, conf) => {
      *
      */
     Detach() {
-      if (this.parent?.detach(this)) {
+      if (this.parent?._detach(this)) {
         this.parent = undefined;
         return true;
       }
@@ -400,4 +349,67 @@ export const Comp_AttachHost = (state, conf) => {
   });
 
   return obj;
+};
+
+/**
+ * @typedef {object} CompActionConf config obj for attachable parts
+ *
+ */
+/**
+ * @typedef {} CompAction
+*/
+/**
+*
+* @param {gunPart} state target obj
+* @param {CompActionConf} conf
+* @returns component for making a part attachable to another.
+*/
+export const Comp_Action = (state, conf) => {
+ let obj = {
+   /**
+    * parent this gun part is attached to
+    * @type {partSlot}
+    */
+   parent: undefined,
+
+   /**
+    * compatable attachment types
+    * @type {SLOTTYPE}
+    */
+   attachType: conf.attachType,
+
+   /**
+    * attach to a part slot.
+    * checks attach type.
+    * @param {partSlot} target to attach to
+    * @return {boolean} if attached successfully
+    */
+   Attach(target) {
+     if (!this.parent && target.attachType == this.attachType)
+       if (target._attach(this)) {
+         this.parent = target;
+         target._attach(this);
+         return true;
+       }
+
+     return false;
+   },
+
+   /**
+    *
+    */
+   Detach() {
+     if (this.parent?._detach(this)) {
+       this.parent = undefined;
+       return true;
+     }
+     return false;
+   },
+ };
+
+ if (conf.parent) {
+   obj.Attach(conf.parent);
+ }
+
+ return obj;
 };

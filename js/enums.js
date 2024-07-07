@@ -1,9 +1,9 @@
-import { Enum } from "./helpers.js";
+import MyEnum from "../myJS/MyEnum.js";
 
 /**
  * gun calibers
  */
-export class CALIBER extends Enum {
+export class CALIBER extends MyEnum {
   static CAL9 = new CALIBER("cal9", "9×19mm Parabellum", "9mm", 1);
   static CAL45 = new CALIBER("cal45", ".45 Auto", ".45", 0.8);
   static CAL50 = new CALIBER("cal50", ".50 Action Express", ".50 AE", 0.7);
@@ -28,7 +28,7 @@ export class CALIBER extends Enum {
     return this.fullname;
   }
 }
-export class SLOTTYPE extends Enum {
+export class SLOTTYPE extends MyEnum {
   static PistolSlide = new SLOTTYPE("stPistolSlide", "pistol slide");
   static PistolBolt = new SLOTTYPE("stPistolBolt", "pistol bolt");
   static PistolGrip = new SLOTTYPE("stPistolGrip", "pistol grip");
@@ -74,7 +74,7 @@ export class SLOTTYPE extends Enum {
     this.fullname = fullname;
   }
 }
-export class FIREMODE extends Enum {
+export class FIREMODE extends MyEnum {
   static safe = new FIREMODE("fmSafe", "safe", 0);
   static auto = new FIREMODE("fmAuto", "auto", -1);
   static single = new FIREMODE("fmSingle", "single", 1);
@@ -101,7 +101,7 @@ export class FIREMODE extends Enum {
     this.fullname = fullname;
   }
 }
-export class ROUNDSTATES extends Enum {
+export class ROUNDSTATES extends MyEnum {
   static Ready = new ROUNDSTATES("rsReady", "normal round");
   static Spent = new ROUNDSTATES("rsSpent", "a spent cartridge");
 

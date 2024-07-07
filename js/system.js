@@ -1,4 +1,4 @@
-import { Enum } from "./helpers.js";
+import MyEnum from "../myJS/MyEnum.js";
 import * as Parts from "./parts.js";
 import * as Components from "./composition.js";
 
@@ -10,7 +10,7 @@ export class GunFactory {
 
   /**
    * @typedef {Parts.gunPart &
-   * Components.Comp_AttachHost} FrameGeneral base gun frame
+   * Components.CompAttachHost} FrameGeneral base gun frame
    */
   /**
    * Base gun frame, no grip
@@ -77,7 +77,7 @@ export class GunFactory {
    * validate an enum variable in a config object
    */
   static ValEnum(obj, str) {
-    if (obj[str]) if (typeof obj[str] === "string") obj[str] = Enum.find(conf.caliber);
+    if (obj[str]) if (typeof obj[str] === "string") obj[str] = MyEnum.find(conf.caliber);
   }
 
   static ConfValidate(conf) {
