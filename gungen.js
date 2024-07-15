@@ -21,6 +21,7 @@ window.onload = function () {
 
 /**
  * @type {HTMLElement}
+ * 
  */
 var TestObj = document.getElementsByClassName("draggable")[0];
 var GameRect = GameWindow.getBoundingClientRect();
