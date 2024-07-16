@@ -2,11 +2,20 @@ import * as System from "./js/system.js";
 import * as Parts from "./js/parts.js";
 import * as Enums from "./js/enums.js";
 import MyMath from "./myJS/MyMath.js";
-import MyDraggable from "./myJS/MyDraggable.js";
+import MyTemplate from "./myJS/MyTemplate.js";
+import MyArr from "./myJS/MyArr.js";
+import MyHTML from "./myJS/MyHTML.js";
 
 const FPS = 1000 / 60;
 var InterMainLoop = 0;
 const GameWindow = document.getElementById("GameWindow");
+
+if (!MyTemplate.supports()) {
+  alert(
+    "Your browser does not fully support this website!\n My portfolio projects won't be displayed currently."
+  );
+  stop();
+}
 
 /**
  * Kills the game loop
@@ -19,35 +28,105 @@ window.onload = function () {
   InterMainLoop = setInterval(MainLoop, FPS);
 };
 
+GameWindow.addEventListener("mousedown", (event) => event.preventDefault());
+GameWindow.addEventListener("contextmenu", (event) => event.preventDefault());
+
 /**
- * @type {HTMLElement}
- * 
+ *
+ *
  */
-var TestObj = document.getElementsByClassName("draggable")[0];
+var TestObjs = GameWindow.getElementsByClassName("grabTarget");
 var GameRect = GameWindow.getBoundingClientRect();
+var DraggedObj = System.GrabSystem.GetDraggedObjs();
 
 /**
  * the main game loop.
  */
 function MainLoop() {
-  // console.log("Test");
+  let spd = 2;
 
-  let testRect = TestObj.getBoundingClientRect();
-  let target = { x: GameRect.x, y: GameRect.y };
+  let rect, target, newPoint;
+  for (let i = 0; i < TestObjs.length; i++) {
+    /**
+     * @type {HTMLElement}
+     */
+    const element = TestObjs[i];
 
-  if (testRect.x != target.x || testRect.y != target.y) {
-    let newPoint = MyMath.findNewPoint(testRect.x, testRect.y, MyMath.pointAngle(testRect.x, testRect.y, target.x, target.y), 2);
+    if (DraggedObj.indexOf(element) != -1) continue;
 
-    newPoint = {
-      x: Math.max(newPoint.x, target.x),
-      y: Math.max(newPoint.y, target.y),
+    //#region moveing items over time
+
+    rect = element.getBoundingClientRect();
+    target = {
+      x: GameRect.x + GameRect.width / 2,
+      y: GameRect.y + GameRect.height / 2,
     };
+    if (rect.x != target.x || rect.y != target.y) {
+      newPoint = MyMath.findNewPoint(
+        rect.x,
+        rect.y,
+        MyMath.pointAngle(rect.x, rect.y, target.x, target.y),
+        spd
+      );
 
-    MyDraggable.MoveElTo(TestObj, newPoint.x, newPoint.y);
+      System.GrabSystem.MoveElTo(
+        element,
+        MyMath.ovsh(rect.x, newPoint.x, target.x),
+        MyMath.ovsh(rect.y, newPoint.y, target.y)
+      );
+    }
+    //#endregion
   }
 }
 
 // ------------------- TEST ----------------------------
+
+let myFrame = System.GunFactory.Make_FramePistol(
+  {
+    model: "Pistol Frame",
+  },
+  {
+    partSlotlist: [
+      // myMagSlot,
+      // new Parts.partSlot({
+      //   attachType: Enums.SLOTTYPE.Extractor,
+      //   child: myExtractor,
+      // }),
+    ],
+  },
+  {
+    grabEnabled: true,
+  }
+);
+
+/**
+ * @type {HTMLElement}
+ */
+let grab;
+/**
+ * @type {HTMLElement}
+ */
+let grabs;
+let gx = 0,
+  gy = 5,
+  gw = 10,
+  gh = 10;
+for (let i = 0; i < 2; i++) {
+  grab = MyTemplate.addTemplate(
+    document.getElementById("temp_Grabbable"),
+    GameWindow
+  )[0];
+
+  grabs = grab.getElementsByClassName("grabSource")[0];
+  grabs.style.left = gx * System.Game.Scale + "px";
+  grabs.style.top = gy * System.Game.Scale + "px";
+  grabs.style.width = gw * System.Game.Scale + "px";
+  grabs.style.height = gh * System.Game.Scale + "px";
+
+  MyTemplate.addTemplate(document.getElementById("temp_Displayable"), grab);
+}
+
+System.GrabSystem.MakeClassDraggable("grabTarget", "grabSource", GameWindow);
 
 // /**
 //  * @type {Parts.RoundConfig}
@@ -114,5 +193,3 @@ function MainLoop() {
 // myExtractor.Eject();
 // myExtractor.Feed();
 // console.log("round: ", myExtractor.heldRound, myMagSlot.child.contents.length);
-
-MyDraggable.MakeClassDraggable("draggable", "dragHandle", GameWindow);

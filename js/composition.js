@@ -3,6 +3,27 @@ import { Round, gunPart, partSlot } from "./parts.js";
 import { GunFactory } from "./system.js";
 
 /**
+ * @typedef {object} CompDisplayableConf the CompBulletContainer objects config object
+ * @property {} img caliber enum name
+ */
+/**
+ * @typedef { } CompDisplayable
+ */
+/**
+ * making the part displayable.
+ * @param {gunPart} state target obj
+ * @param {CompDisplayableConf} conf config objects
+ * @returns {CompDisplayable} component for something containing bullets.
+ */
+export const Comp_Displayable = (state, conf) => {
+  let obj = {
+    htmlElement,
+  };
+
+  return obj;
+};
+
+/**
  * @typedef {object} CompBulContConf the CompBulletContainer objects config object
  * @property {string | CALIBER} caliber caliber enum name
  * @property {number} capacity ammo capacity
@@ -357,59 +378,59 @@ export const Comp_AttachHost = (state, conf) => {
  */
 /**
  * @typedef {} CompAction
-*/
+ */
 /**
-*
-* @param {gunPart} state target obj
-* @param {CompActionConf} conf
-* @returns component for making a part attachable to another.
-*/
+ *
+ * @param {gunPart} state target obj
+ * @param {CompActionConf} conf
+ * @returns component for making a part attachable to another.
+ */
 export const Comp_Action = (state, conf) => {
- let obj = {
-   /**
-    * parent this gun part is attached to
-    * @type {partSlot}
-    */
-   parent: undefined,
+  let obj = {
+    /**
+     * parent this gun part is attached to
+     * @type {partSlot}
+     */
+    parent: undefined,
 
-   /**
-    * compatable attachment types
-    * @type {SLOTTYPE}
-    */
-   attachType: conf.attachType,
+    /**
+     * compatable attachment types
+     * @type {SLOTTYPE}
+     */
+    attachType: conf.attachType,
 
-   /**
-    * attach to a part slot.
-    * checks attach type.
-    * @param {partSlot} target to attach to
-    * @return {boolean} if attached successfully
-    */
-   Attach(target) {
-     if (!this.parent && target.attachType == this.attachType)
-       if (target._attach(this)) {
-         this.parent = target;
-         target._attach(this);
-         return true;
-       }
+    /**
+     * attach to a part slot.
+     * checks attach type.
+     * @param {partSlot} target to attach to
+     * @return {boolean} if attached successfully
+     */
+    Attach(target) {
+      if (!this.parent && target.attachType == this.attachType)
+        if (target._attach(this)) {
+          this.parent = target;
+          target._attach(this);
+          return true;
+        }
 
-     return false;
-   },
+      return false;
+    },
 
-   /**
-    *
-    */
-   Detach() {
-     if (this.parent?._detach(this)) {
-       this.parent = undefined;
-       return true;
-     }
-     return false;
-   },
- };
+    /**
+     *
+     */
+    Detach() {
+      if (this.parent?._detach(this)) {
+        this.parent = undefined;
+        return true;
+      }
+      return false;
+    },
+  };
 
- if (conf.parent) {
-   obj.Attach(conf.parent);
- }
+  if (conf.parent) {
+    obj.Attach(conf.parent);
+  }
 
- return obj;
+  return obj;
 };

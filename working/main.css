@@ -1,4 +1,8 @@
 body {
+  --scale: 4;
+}
+
+body {
   color: white;
   background: black;
 }
@@ -12,18 +16,33 @@ body {
   background: lightgray;
 }
 
-.draggable {
+#GameWindow > * > * {
   position: absolute;
-  z-index: 9;
-  background-color: #f1f1f1;
-  border: 1px solid #d3d3d3;
-  text-align: center;
 }
 
-.dragHandle {
-  padding: 10px;
-  cursor: move;
-  z-index: 10;
-  background-color: #2196f3;
-  color: #fff;
+.sprite {
+  image-rendering: pixelated;
+  /* size: 2; */
+  /* width: default; */
+  transform-origin: top left;
+  transform: scale(var(--scale));
 }
+
+/* #region components */
+
+.grabTarget {
+  position: absolute;
+}
+
+.grabSource {
+  position: relative;
+  cursor: move;
+  z-index: 999;
+
+  background-color: rgba(255, 0, 0, 0.351);
+}
+
+.attachHost {
+}
+
+/* #endregion */

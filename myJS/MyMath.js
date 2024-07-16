@@ -1,7 +1,7 @@
 /**
  * math handling class.
  * Has only static functions.
- * @version 1.0.0
+ * @version 1.1.0
  * @author Dodgy_Merchant <admin@dodgymerchant.dev>
  */
 export default class MyMath {
@@ -47,8 +47,8 @@ export default class MyMath {
   static findNewPoint(x, y, angle, distance) {
     let result = {};
 
-    result.x = Math.round(Math.cos((angle * Math.PI) / 180) * distance + x);
-    result.y = Math.round(Math.sin((angle * Math.PI) / 180) * distance + y);
+    result.x = Math.cos((angle * Math.PI) / 180) * distance + x;
+    result.y = Math.sin((angle * Math.PI) / 180) * distance + y;
 
     return result;
   }
@@ -120,10 +120,24 @@ export default class MyMath {
       xj = pointList[j].x;
       yj = pointList[j].y;
 
-      intersect = yi > y != yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+      intersect =
+        yi > y != yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
       if (intersect) inside = !inside;
     }
 
     return inside;
   }
+
+  /**
+   * prevents the value from overshooting the target.
+   */
+  static ovsh(oldVal, newVal, target) {
+    return (
+      Math.max((newVal - target) * Math.sign(oldVal - target), 0) *
+        Math.sign(oldVal - target) +
+      target
+    );
+  }
 }
+
+console.log(MyMath.ovsh(130, 90, 100));

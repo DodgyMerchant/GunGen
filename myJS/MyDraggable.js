@@ -9,6 +9,7 @@ import MyMath from "./MyMath.js";
  */
 export default class MyDraggable {
   /**
+   * Array of dragged items.
    * @type {HTMLElement[]}
    */
   static _dragArr = [];
@@ -28,12 +29,17 @@ export default class MyDraggable {
    */
   static MoveElTo(target, toX, toY, restriction) {
     if (restriction) {
-      target.style.left = MyMath.clamp(toX, restriction.left, restriction.right - target.clientWidth) + "px";
-      target.style.top = MyMath.clamp(toY, restriction.top, restriction.bottom - target.clientHeight) + "px";
-      return;
+      let rect = target.getBoundingClientRect();
+      target.style.left =
+        MyMath.clamp(toX, restriction.left, restriction.right - rect.width) +
+        "px";
+      target.style.top =
+        MyMath.clamp(toY, restriction.top, restriction.bottom - rect.height) +
+        "px";
+    } else {
+      target.style.left = toX + "px";
+      target.style.top = toY + "px";
     }
-    target.style.left = toX + "px";
-    target.style.top = toY + "px";
   }
 
   /**
@@ -49,7 +55,12 @@ export default class MyDraggable {
    *  }} [restriction] object with numbers that restrict the movable area. a DOMRect can be used.
    */
   static MoveElBy(target, byX, byY, restriction) {
-    this.MoveElTo(target, target.offsetLeft + byX, target.offsetTop + byY, restriction);
+    this.MoveElTo(
+      target,
+      target.offsetLeft + byX,
+      target.offsetTop + byY,
+      restriction
+    );
   }
 
   /**
@@ -68,7 +79,8 @@ export default class MyDraggable {
 
     if (interactionTarget) {
       // if present, the header is where you move the DIV from:
-      interactionTarget.onmousedown = dragMouseDown;
+      // interactionTarget.onmousedown = dragMouseDown;
+      interactionTarget.addEventListener("mousedown", dragMouseDown);
     } else moveTarget.onmousedown = dragMouseDown;
 
     /**
@@ -81,10 +93,14 @@ export default class MyDraggable {
       // get the mouse cursor position at startup:
       pos3 = ev.clientX;
       pos4 = ev.clientY;
-      document.onmouseup = closeDragElement;
-      document.onmousemove = elementDrag;
 
-      MyDraggable._addDraggable(ev);
+      document.addEventListener("mouseup", closeDragElement);
+      document.addEventListener("mousemove", elementDrag);
+
+      // document.onmouseup = closeDragElement.bind(document, [this]);
+      // document.onmousemove = elementDrag.bind(document, [this]);
+
+      MyDraggable._addDraggable(moveTarget);
     }
 
     /**
@@ -101,8 +117,12 @@ export default class MyDraggable {
       pos4 = ev.clientY;
 
       // set the element's new position:
-
-      MyDraggable.MoveElBy(moveTarget, pos1, pos2, restTarget.getBoundingClientRect());
+      MyDraggable.MoveElBy(
+        moveTarget,
+        pos1,
+        pos2,
+        restTarget.getBoundingClientRect()
+      );
     }
 
     /**
@@ -111,10 +131,11 @@ export default class MyDraggable {
      */
     function closeDragElement(ev) {
       // stop moving when mouse button is released:
-      document.onmouseup = null;
-      document.onmousemove = null;
 
-      MyDraggable._removeDraggable(ev);
+      document.removeEventListener("mouseup", closeDragElement);
+      document.removeEventListener("mousemove", elementDrag);
+
+      MyDraggable._removeDraggable(moveTarget);
     }
   }
 
@@ -130,23 +151,28 @@ export default class MyDraggable {
 
     for (let i = 0; i < objs.length; i++) {
       obj = objs[i];
-      this.MakeElementDraggable(obj, obj.getElementsByClassName(interClass)[0], restTarget);
+      this.MakeElementDraggable(
+        obj,
+        obj.getElementsByClassName(interClass)[0],
+        restTarget
+      );
+      console.log("Made Draggable: ", obj);
     }
   }
 
   /**
    *
-   * @param {MouseEvent} ev
+   * @param {any} any
    */
-  static _addDraggable(ev) {
-    MyDraggable._dragArr.push(ev.sourceCapabilities);
+  static _addDraggable(any) {
+    MyDraggable._dragArr.push(any);
   }
   /**
    *
-   * @param {MouseEvent} ev
+   * @param {any} any
    */
-  static _removeDraggable(ev) {
-    MyArr.removeEntry(MyDraggable._dragArr, ev.sourceCapabilities);
+  static _removeDraggable(any) {
+    MyArr.removeEntry(MyDraggable._dragArr, any);
   }
 
   /**

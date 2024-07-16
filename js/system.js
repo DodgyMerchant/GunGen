@@ -1,6 +1,52 @@
 import MyEnum from "../myJS/MyEnum.js";
 import * as Parts from "./parts.js";
 import * as Components from "./composition.js";
+import MyDraggable from "../myJS/MyDraggable.js";
+import MyHTML from "../myJS/MyHTML.js";
+
+/**
+ * manages the game generally.
+ * Includes: HTMLelements,
+ */
+export class Game {
+  static EEE = document.body.mouse;
+
+  static get Scale() {
+    return MyHTML.getPropertyFlt(document.body, "--scale");
+  }
+  static set Scale(value) {
+    document.body.style.setProperty("--scale", value + "");
+  }
+
+  /**
+   * returns the Bounding box scaled and adjusted.
+   * @param {HTMLElement} element
+   * @returns {DOMRect}
+   */
+  static GetBBox(element) {
+    let bound = element.getBoundingClientRect();
+
+    return bound;
+  }
+
+  /**
+   * expensive
+   */
+  static GetTransform(element) {
+    let str = MyHTML.getPropertyStr(element, "transform");
+    if (str == "none") return [];
+
+    let arr = [];
+    let num;
+    for (let i = str.indexOf("(") + 1; i < str.length; i += 3) {
+      let num = parseFloat(str.charAt(i));
+      num = str.charAt(i);
+      arr.push(num);
+    }
+
+    return arr;
+  }
+}
 
 /**
  * makes guns and manages them
@@ -51,7 +97,11 @@ export class GunFactory {
    */
   static Make_Magazine(partConf, containConf, attachConf) {
     let obj = new Parts.gunPart(partConf);
-    return Object.assign(obj, Components.Comp_BulletContainer(obj, containConf), Components.Comp_Attachable(obj, attachConf));
+    return Object.assign(
+      obj,
+      Components.Comp_BulletContainer(obj, containConf),
+      Components.Comp_Attachable(obj, attachConf)
+    );
   }
 
   /**
@@ -67,7 +117,11 @@ export class GunFactory {
    */
   static Make_Extractor(partConf, attachConf, bHoldConf) {
     let obj = new Parts.gunPart(partConf);
-    return Object.assign(obj, Components.Comp_Attachable(obj, attachConf), Components.Comp_BulletHolder(obj, bHoldConf));
+    return Object.assign(
+      obj,
+      Components.Comp_Attachable(obj, attachConf),
+      Components.Comp_BulletHolder(obj, bHoldConf)
+    );
   }
 
   //#endregion make
@@ -77,7 +131,8 @@ export class GunFactory {
    * validate an enum variable in a config object
    */
   static ValEnum(obj, str) {
-    if (obj[str]) if (typeof obj[str] === "string") obj[str] = MyEnum.find(conf.caliber);
+    if (obj[str])
+      if (typeof obj[str] === "string") obj[str] = MyEnum.find(conf.caliber);
   }
 
   static ConfValidate(conf) {
@@ -129,3 +184,7 @@ export class GunFactory {
 
   //#endregion
 }
+
+export class GrabSystem extends MyDraggable {}
+
+Game.Scale = 4;

@@ -5,21 +5,30 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Page Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" type="text/css" media="screen" href="working/main.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+      href="working/main.css"
+    />
     <script src="working/main.js"></script>
   </head>
   <body>
     <h1>GunGen</h1>
     <div id="GameWindow">
       <!-- Draggable DIV -->
-      <div class="draggable">
-        <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
-        <div class="dragHandle">Click here to move</div>
-        <p>Move</p>
-        <p>this</p>
-        <p>DIV</p>
-      </div>
     </div>
     <script src="gungen.js" type="module"></script>
+    <template id="temp_Grabbable">
+      <div class="grabTarget">
+        <div class="grabSource"></div>
+      </div>
+    </template>
+    <template id="temp_Displayable">
+      <img class="displayable sprite" src="assets/gun1.png" />
+    </template>
+    <template id="temp_AttachHost">
+      <div class="attachHost"></div>
+    </template>
   </body>
 </html>
