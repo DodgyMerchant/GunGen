@@ -7,8 +7,11 @@ import MyArr from "./myJS/MyArr.js";
 import MyHTML from "./myJS/MyHTML.js";
 
 const FPS = 1000 / 60;
+// const FPS = 1000;
 var InterMainLoop = 0;
 const GameWindow = document.getElementById("GameWindow");
+const GameSpace = document.getElementById("GameSpace");
+const GameUI = document.getElementById("UI");
 
 if (!MyTemplate.supports()) {
   alert(
@@ -35,47 +38,51 @@ GameWindow.addEventListener("contextmenu", (event) => event.preventDefault());
  *
  *
  */
-var TestObjs = GameWindow.getElementsByClassName("grabTarget");
-var GameRect = GameWindow.getBoundingClientRect();
+var TestObjs = GameSpace.children;
+var GameRect;
 var DraggedObj = System.GrabSystem.GetDraggedObjs();
 
 /**
  * the main game loop.
  */
 function MainLoop() {
-  let spd = 2;
+  let spd = 1;
 
-  let rect, target, newPoint;
+  GameRect = GameSpace.getBoundingClientRect();
+  let target = {
+    x: GameRect.width / 2,
+    y: GameRect.height / 2,
+  };
+
+  let rect, newPoint, element;
   for (let i = 0; i < TestObjs.length; i++) {
     /**
      * @type {HTMLElement}
      */
-    const element = TestObjs[i];
+    element = TestObjs[i];
 
     if (DraggedObj.indexOf(element) != -1) continue;
 
-    //#region moveing items over time
-
-    rect = element.getBoundingClientRect();
-    target = {
-      x: GameRect.x + GameRect.width / 2,
-      y: GameRect.y + GameRect.height / 2,
+    rect = {
+      x: element.offsetLeft,
+      y: element.offsetTop,
     };
-    if (rect.x != target.x || rect.y != target.y) {
-      newPoint = MyMath.findNewPoint(
-        rect.x,
-        rect.y,
-        MyMath.pointAngle(rect.x, rect.y, target.x, target.y),
-        spd
-      );
 
-      System.GrabSystem.MoveElTo(
-        element,
-        MyMath.ovsh(rect.x, newPoint.x, target.x),
-        MyMath.ovsh(rect.y, newPoint.y, target.y)
-      );
+    if (rect.x != target.x || rect.y != target.y) {
+      let ang = MyMath.pointAngle(rect.x, rect.y, target.x, target.y);
+
+      console.log(ang);
+      newPoint = MyMath.findNewPoint(rect.x, rect.y, ang, spd);
+
+      // System.GrabSystem.MoveElTo(
+      //   element,
+      //   MyMath.ovsh(rect.x, newPoint.x, target.x),
+      //   MyMath.ovsh(rect.y, newPoint.y, target.y)
+      //   // GameSpace.getBoundingClientRect()
+      // );
+
+      System.GrabSystem.MoveElTo(element, newPoint.x, newPoint.y);
     }
-    //#endregion
   }
 }
 
@@ -102,31 +109,41 @@ let myFrame = System.GunFactory.Make_FramePistol(
 /**
  * @type {HTMLElement}
  */
-let grab;
-/**
- * @type {HTMLElement}
- */
-let grabs;
+let grab, base, img;
 let gx = 0,
   gy = 5,
   gw = 10,
   gh = 10;
-for (let i = 0; i < 2; i++) {
-  grab = MyTemplate.addTemplate(
-    document.getElementById("temp_Grabbable"),
-    GameWindow
+let num = 1;
+for (let i = 0; i < num; i++) {
+  // base
+  base = MyTemplate.addTemplate(
+    document.getElementById("temp_PartBase"),
+    GameSpace
   )[0];
 
-  grabs = grab.getElementsByClassName("grabSource")[0];
-  grabs.style.left = gx * System.Game.Scale + "px";
-  grabs.style.top = gy * System.Game.Scale + "px";
-  grabs.style.width = gw * System.Game.Scale + "px";
-  grabs.style.height = gh * System.Game.Scale + "px";
+  // grabbable
+  MyHTML.addClass(base, "grabTarget");
+  grab = MyTemplate.addTemplate(
+    document.getElementById("temp_Grabbable"),
+    base
+  )[0];
+  grab.style.left = gx * System.Game.Scale + "px";
+  grab.style.top = gy * System.Game.Scale + "px";
+  grab.style.width = gw * System.Game.Scale + "px";
+  grab.style.height = gh * System.Game.Scale + "px";
 
-  MyTemplate.addTemplate(document.getElementById("temp_Displayable"), grab);
+  // display
+  img = MyTemplate.addTemplate(
+    document.getElementById("temp_Displayable"),
+    base
+  )[0];
+
+  img.style.width = img.naturalWidth * System.Game.Scale + "px";
+  img.style.height = img.naturalHeight * System.Game.Scale + "px";
 }
 
-System.GrabSystem.MakeClassDraggable("grabTarget", "grabSource", GameWindow);
+System.GrabSystem.MakeClassDraggable("grabTarget", "grabSource", GameSpace);
 
 // /**
 //  * @type {Parts.RoundConfig}

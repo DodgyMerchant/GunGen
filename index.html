@@ -16,19 +16,187 @@
   <body>
     <h1>GunGen</h1>
     <div id="GameWindow">
-      <!-- Draggable DIV -->
+      <div id="GameSpace"></div>
+      <div id="UI"></div>
     </div>
-    <script src="gungen.js" type="module"></script>
-    <template id="temp_Grabbable">
-      <div class="grabTarget">
-        <div class="grabSource"></div>
-      </div>
+
+    <template id="temp_PartBase">
+      <div class="gunPart"></div>
     </template>
+
+    <template id="temp_Grabbable">
+      <div class="grabSource"></div>
+    </template>
+
     <template id="temp_Displayable">
       <img class="displayable sprite" src="assets/gun1.png" />
     </template>
+
     <template id="temp_AttachHost">
       <div class="attachHost"></div>
     </template>
+
+    <div>
+      <p>
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+        fdjkjajlkfjlsfjl ksdjf lsjjfl lkj lksdfsdjfj llkjflkdsf lk lfsf.
+      </p>
+    </div>
   </body>
+  <script src="gungen.js" type="module"></script>
 </html>

@@ -8,6 +8,7 @@ body {
 }
 
 #GameWindow {
+  position: relative;
   --w: 600px;
   --h: 600px;
   width: var(--w);
@@ -15,31 +16,41 @@ body {
 
   background: lightgray;
 }
-
-#GameWindow > * > * {
+#GameSpace {
   position: absolute;
+  width: 100%;
+  height: 100%;
+}
+#UI {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+#GameSpace > * {
 }
 
 .sprite {
   image-rendering: pixelated;
-  /* size: 2; */
-  /* width: default; */
-  transform-origin: top left;
-  transform: scale(var(--scale));
 }
 
 /* #region components */
+
+.gunPart {
+  width: auto;
+  height: auto;
+}
 
 .grabTarget {
   position: absolute;
 }
 
 .grabSource {
-  position: relative;
+  position: absolute;
   cursor: move;
   z-index: 999;
 
-  background-color: rgba(255, 0, 0, 0.351);
+  background-color: rgba(255, 0, 0, 0.26);
 }
 
 .attachHost {

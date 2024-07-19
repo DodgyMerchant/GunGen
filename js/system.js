@@ -9,11 +9,16 @@ import MyHTML from "../myJS/MyHTML.js";
  * Includes: HTMLelements,
  */
 export class Game {
-  static EEE = document.body.mouse;
-
+  /**
+   * game scale
+   */
   static get Scale() {
     return MyHTML.getPropertyFlt(document.body, "--scale");
   }
+
+  /**
+   * game scale
+   */
   static set Scale(value) {
     document.body.style.setProperty("--scale", value + "");
   }
@@ -186,5 +191,3 @@ export class GunFactory {
 }
 
 export class GrabSystem extends MyDraggable {}
-
-Game.Scale = 4;

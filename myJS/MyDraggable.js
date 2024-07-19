@@ -18,8 +18,8 @@ export default class MyDraggable {
    * move element to x,y position.
    * in pixels.
    * @param {HTMLElement} target
-   * @param {number} toX
-   * @param {number} toY
+   * @param {number} toX number relativ to offsetParent
+   * @param {number} toY number relativ to offsetParent
    * @param {{
    *  bottom : number,
    *  left : number,
@@ -30,16 +30,25 @@ export default class MyDraggable {
   static MoveElTo(target, toX, toY, restriction) {
     if (restriction) {
       let rect = target.getBoundingClientRect();
+      let parRect = target.offsetParent.getBoundingClientRect();
+
       target.style.left =
-        MyMath.clamp(toX, restriction.left, restriction.right - rect.width) +
-        "px";
+        MyMath.clamp(
+          toX,
+          restriction.left - parRect.left,
+          restriction.right - parRect.left - rect.width
+        ) + "px";
       target.style.top =
-        MyMath.clamp(toY, restriction.top, restriction.bottom - rect.height) +
-        "px";
+        MyMath.clamp(
+          toY,
+          restriction.top - parRect.top,
+          restriction.bottom - parRect.top - rect.height
+        ) + "px";
     } else {
       target.style.left = toX + "px";
       target.style.top = toY + "px";
     }
+    // console.log(toX, target.style.left);
   }
 
   /**
@@ -81,7 +90,7 @@ export default class MyDraggable {
       // if present, the header is where you move the DIV from:
       // interactionTarget.onmousedown = dragMouseDown;
       interactionTarget.addEventListener("mousedown", dragMouseDown);
-    } else moveTarget.onmousedown = dragMouseDown;
+    } else moveTarget.addEventListener("mousedown", dragMouseDown);
 
     /**
      *
@@ -90,9 +99,9 @@ export default class MyDraggable {
     function dragMouseDown(ev) {
       ev = ev || window.event;
       ev.preventDefault();
-      // get the mouse cursor position at startup:
-      pos3 = ev.clientX;
-      pos4 = ev.clientY;
+
+      pos3 = ev.pageX;
+      pos4 = ev.pageY;
 
       document.addEventListener("mouseup", closeDragElement);
       document.addEventListener("mousemove", elementDrag);
@@ -111,16 +120,29 @@ export default class MyDraggable {
       ev = ev || window.event;
       ev.preventDefault();
       // calculate the new cursor position:
-      pos1 = ev.clientX - pos3;
-      pos2 = ev.clientY - pos4;
-      pos3 = ev.clientX;
-      pos4 = ev.clientY;
+      // pos1 = ev.clientX - pos3;
+      // pos2 = ev.clientY - pos4;
+      // pos3 = ev.clientX;
+      // pos4 = ev.clientY;
+
+      // set the element's new position:
+      // MyDraggable.MoveElBy(
+      //   moveTarget,
+      //   pos1,
+      //   pos2,
+      //
+      // );
+
+      pos1 = ev.pageX - pos3;
+      pos2 = ev.pageY - pos4;
+      pos3 = ev.pageX;
+      pos4 = ev.pageY;
 
       // set the element's new position:
       MyDraggable.MoveElBy(
         moveTarget,
         pos1,
-        pos2,
+        pos2, // TODO: make relativ
         restTarget.getBoundingClientRect()
       );
     }
@@ -181,5 +203,20 @@ export default class MyDraggable {
    */
   static GetDraggedObjs() {
     return MyDraggable._dragArr;
+  }
+
+  /**
+   * get offset to page
+   * @param {HTMLElement} el
+   */
+  static GetOffset(el) {
+    var _x = 0;
+    var _y = 0;
+    while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+      _x += el.offsetLeft - el.scrollLeft;
+      _y += el.offsetTop - el.scrollTop;
+      el = el.offsetParent;
+    }
+    return { top: _y, left: _x };
   }
 }

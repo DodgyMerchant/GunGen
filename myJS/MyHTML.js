@@ -102,14 +102,16 @@ export default class MyHTML {
    * @param {string} name one or multiple classes. split by space.
    */
   static addClass(element, name) {
-    let i, arr1, arr2;
-    arr1 = element.className.split(" ");
-    arr2 = name.split(" ");
-    for (i = 0; i < arr2.length; i++) {
-      if (arr1.indexOf(arr2[i]) == -1) {
-        element.className += " " + arr2[i];
-      }
-    }
+    // let i, arr1, arr2;
+    // arr1 = element.className.split(" ");
+    // arr2 = name.split(" ");
+    // for (i = 0; i < arr2.length; i++) {
+    //   if (arr1.indexOf(arr2[i]) == -1) {
+    //     element.className += " " + arr2[i];
+    //   }
+    // }
+
+    element.classList.add(name.split(" "));
   }
   /**
    *
@@ -218,6 +220,7 @@ export default class MyHTML {
    * @param {string} childName
    */
   static getChildById(parentEl, childName) {
+
     let leng = parentEl.children.length;
     /**
      * @type {HTMLElement}

@@ -45,11 +45,10 @@ export default class MyMath {
    * @returns {{x: number, y: number}}
    */
   static findNewPoint(x, y, angle, distance) {
-    let result = {};
-
-    result.x = Math.cos((angle * Math.PI) / 180) * distance + x;
-    result.y = Math.sin((angle * Math.PI) / 180) * distance + y;
-
+    let result = {
+      x: Math.cos(angle) * distance + x,
+      y: Math.sin(angle) * distance + y,
+    };
     return result;
   }
 
@@ -62,12 +61,18 @@ export default class MyMath {
    * @returns {number}
    */
   static pointAngle(cx, cy, ex, ey) {
-    let dy = ey - cy;
-    let dx = ex - cx;
-    let theta = Math.atan2(dy, dx); // range (-PI, PI]
-    theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
+    // let theta = Math.atan2(ey - cy, ex - cx); // range (-PI, PI]
+    // theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
     //if (theta < 0) theta = 360 + theta; // range [0, 360)
-    return theta;
+    // return theta;
+    return Math.atan2(ey - cy, ex - cx);
+  }
+
+  static degToRad(deg) {
+    return (deg * Math.PI) / 180;
+  }
+  static radToDeg(rad) {
+    return rad * (180 / Math.PI);
   }
 
   /**
@@ -139,5 +144,3 @@ export default class MyMath {
     );
   }
 }
-
-console.log(MyMath.ovsh(130, 90, 100));
