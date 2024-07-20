@@ -157,7 +157,7 @@ export class partRail extends partSlot {
    * @param {gunPart} part part to detach
    */
   // _attach(attach) {
-  //   //TODO attach part to rail
+  // TODO attach part to rail
   // }
 }
 
@@ -166,7 +166,7 @@ export class partRail extends partSlot {
  * @property {string} model name of the gun model
  */
 /**
- * base gun part of a gun
+ * base gun part of a gun.
  */
 export class gunPart {
   /**
@@ -176,14 +176,17 @@ export class gunPart {
   model;
 
   /**
+   * @type {htmlElement}
+   */
+  htmlElement;
+
+  /**
    * base gun part of a gun
-   *
-   *
-   *
    * @param {PartConf} conf config objects
    */
-  constructor(conf) {
+  constructor(conf, htmlElement) {
     this.model = conf.model;
+    this.htmlElement = htmlElement;
   }
 
   /**
@@ -196,11 +199,6 @@ export class gunPart {
 
   toString() {
     return `GunPart: ${this.model}`;
-  }
-
-  toJson() {
-    //TODO make to jason
-    let obj = {};
   }
 }
 
@@ -313,7 +311,10 @@ class gunPart_Top extends gunPart {
 
     if (oldPos < this.feedPosition || this.position >= this.feedPosition) {
       console.log("EXTRACT ROUND");
-    } else if (oldPos > this.feedPosition || this.position <= this.feedPosition) {
+    } else if (
+      oldPos > this.feedPosition ||
+      this.position <= this.feedPosition
+    ) {
       console.log("EJECT ROUND");
     }
   }

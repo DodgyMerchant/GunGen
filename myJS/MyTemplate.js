@@ -1,5 +1,7 @@
 //check for Template support
-const supportsTemplate = new Boolean(document.createElement("Template").content);
+const supportsTemplate = new Boolean(
+  document.createElement("Template").content
+);
 //continue or exit
 if (supportsTemplate) {
   console.log("Your browser supports Template!");
@@ -17,7 +19,7 @@ export default class MyTemplate {
   /**
    *  only creates element from template
    * @param {HTMLTemplateElement} template
-   * @returns {HTMLElement} appended child of template
+   * @returns appended child of template
    */
   static create(template) {
     if (!supportsTemplate) return;
@@ -37,23 +39,28 @@ export default class MyTemplate {
     }
   }
 
-  static addChild(child, target) {
-    return target.appendChild(child);
-  }
   /**
-   * adds all template children to target element and returns a list of all added elelemnts.
+   * adds all children of DocumentFragment to a target.
+   * @param {DocumentFragment} parent
+   * @param {HTMLElement} target
+   */
+  static addChildren(parent, target) {
+    let list = [];
+    do {
+      list.push(target.appendChild(parent.firstElementChild));
+    } while (parent.childElementCount > 0);
+    return list;
+  }
+
+  /**
+   * adds everything within given template to target.
    * @param {HTMLTemplateElement} template
    * @param {HTMLElement} target
    * @returns {Element[]}
    */
   static addTemplate(template, target) {
-    let list = [];
     let temp = this.create(template);
-    do {
-      list.push(this.addChild(temp.firstElementChild, target));
-    } while (temp.childElementCount > 0);
-
-    return list;
+    return this.addChildren(temp, target);
   }
 
   /**

@@ -3,19 +3,51 @@ import * as Parts from "./parts.js";
 import * as Components from "./composition.js";
 import MyDraggable from "../myJS/MyDraggable.js";
 import MyHTML from "../myJS/MyHTML.js";
+import MyTemplate from "../myJS/MyTemplate.js";
 
+/**
+ * @typedef {object} GameSpaceConfig gameconfig object
+ * @property {number} Scale multiplier
+ * @property {number} Width
+ * @property {number} Height
+ */
+/**
+ * @typedef {object} GameUIConfig gameconfig object
+ * @property {number} FPS
+ * @property {HTMLElement} GameWindow
+ * @property {number} Scale
+ */
+/**
+ * @typedef {object} GameConfig gameconfig object
+ * @property {number} FPS
+ * @property {HTMLElement} GameWindow
+ * @property {GameSpaceConfig} GameSpace
+ * @property {GameUIConfig} GameUI
+ */
 /**
  * manages the game generally.
  * Includes: HTMLelements,
  */
 export class Game {
   /**
+   * @type {HTMLDivElement}
+   */
+  GameWindow;
+  /**
+   * @type {HTMLDivElement}
+   */
+  GameSpace;
+  /**
+   * @type {HTMLDivElement}
+   */
+  GameUI;
+
+  /**
    * game scale
    */
   static get Scale() {
     return MyHTML.getPropertyFlt(document.body, "--scale");
   }
-
   /**
    * game scale
    */
@@ -24,14 +56,18 @@ export class Game {
   }
 
   /**
-   * returns the Bounding box scaled and adjusted.
-   * @param {HTMLElement} element
-   * @returns {DOMRect}
+   *
+   * @param {GameConfig} conf
    */
-  static GetBBox(element) {
-    let bound = element.getBoundingClientRect();
+  constructor(conf) {
+    this.GameWindow = conf.GameWindow;
 
-    return bound;
+    //setup
+
+    this.GameSpace = document.createElement("div");
+    this.GameWindow.appendChild(this.GameSpace);
+    this.GameUI = document.createElement("div");
+    this.GameWindow.appendChild(this.GameUI);
   }
 
   /**
@@ -51,42 +87,77 @@ export class Game {
 
     return arr;
   }
+
+  //#region Gameobj
+
+  _addGameObj() {}
+
+  /**
+   * adds gunpart to gamespace
+   * @param {Parts.gunPart} gunPart
+   */
+  addGunPart(gunPart) {
+    //general
+    this._addGameObj();
+
+    //js
+
+    //html
+
+    this.GameSpace.appendChild(gunPart.htmlElement);
+  }
+
+  //#endregion
 }
 
 /**
- * makes guns and manages them
+ * makes guns and manages them.
+ * handles js and HTML of the gun.
  */
 export class GunFactory {
   //#region make
 
+  //TODO: add displayable class def
   /**
    * @typedef {Parts.gunPart &
+   * Components.CompDisplayable &
    * Components.CompAttachHost} FrameGeneral base gun frame
    */
   /**
    * Base gun frame, no grip
    * @param {Parts.PartConf} partConf
+   * @param {Components.CompDisplayableConf} dispConf
    * @param {Components.CompAttHostConf} attHostConf
    * @returns {FrameGeneral}
    */
-  static Make_FrameGeneral(partConf, attHostConf) {
-    let obj = new Parts.gunPart(partConf);
-    return Object.assign(obj, Components.Comp_AttachHost(obj, attHostConf));
+  static Make_FrameGeneral(partConf, dispConf, attHostConf) {
+    //GameSpace
+    let base = MyTemplate.create(
+      document.getElementById("temp_PartBase")
+    ).firstElementChild;
+
+    let obj = new Parts.gunPart(partConf, base);
+    return Object.assign(
+      obj,
+      Components.Comp_Displayable(obj, dispConf),
+      Components.Comp_AttachHost(obj, attHostConf)
+    );
   }
 
   /**
    * @typedef {FrameGeneral &
-   * Components.CompGrabConf} FramePistol base pistol frame
+   * Components.CompGrabbable} FramePistol base pistol frame
    */
   /**
    * Base pistol frame, with grip!
    * @param {Parts.PartConf} partConf
+   * @param {Components.CompDisplayableConf} dispConf
    * @param {Components.CompAttHostConf} attHostConf
    * @param {Components.CompGrabConf} grabConf
    * @returns {FramePistol}
    */
-  static Make_FramePistol(partConf, attHostConf, grabConf) {
-    let obj = GunFactory.Make_FrameGeneral(partConf, attHostConf);
+  static Make_FramePistol(partConf, dispConf, attHostConf, grabConf) {
+    let obj = GunFactory.Make_FrameGeneral(partConf, dispConf, attHostConf);
     return Object.assign(obj, Components.Comp_Grabbable(obj, grabConf));
   }
 

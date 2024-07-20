@@ -54,34 +54,32 @@ function MainLoop() {
     y: GameRect.height / 2,
   };
 
-  let rect, newPoint, element;
+  let rect, newPoint;
+  /**
+   * @type {HTMLElement}
+   */
+  let element;
   for (let i = 0; i < TestObjs.length; i++) {
-    /**
-     * @type {HTMLElement}
-     */
     element = TestObjs[i];
 
     if (DraggedObj.indexOf(element) != -1) continue;
 
     rect = {
-      x: element.offsetLeft,
-      y: element.offsetTop,
+      // offsetLeft & offsetTop is an int leads to movement problems.
+      x: MyHTML.getPropertyFlt(element, "left"),
+      y: MyHTML.getPropertyFlt(element, "top"),
     };
 
-    if (rect.x != target.x || rect.y != target.y) {
+    if (!(rect.x == target.x && rect.y == target.y)) {
       let ang = MyMath.pointAngle(rect.x, rect.y, target.x, target.y);
-
-      console.log(ang);
       newPoint = MyMath.findNewPoint(rect.x, rect.y, ang, spd);
 
-      // System.GrabSystem.MoveElTo(
-      //   element,
-      //   MyMath.ovsh(rect.x, newPoint.x, target.x),
-      //   MyMath.ovsh(rect.y, newPoint.y, target.y)
-      //   // GameSpace.getBoundingClientRect()
-      // );
-
-      System.GrabSystem.MoveElTo(element, newPoint.x, newPoint.y);
+      System.GrabSystem.MoveElTo(
+        element,
+        MyMath.ovsh(rect.x, newPoint.x, target.x),
+        MyMath.ovsh(rect.y, newPoint.y, target.y),
+        GameRect
+      );
     }
   }
 }
@@ -93,6 +91,9 @@ let myFrame = System.GunFactory.Make_FramePistol(
     model: "Pistol Frame",
   },
   {
+    imgSrc: "assets/gun1.png",
+  },
+  {
     partSlotlist: [
       // myMagSlot,
       // new Parts.partSlot({
@@ -102,48 +103,19 @@ let myFrame = System.GunFactory.Make_FramePistol(
     ],
   },
   {
-    grabEnabled: true,
+    dimensions: {
+      x: 0,
+      y: 5,
+      w: 10,
+      h: 10,
+    },
+    restrictions: GameSpace,
   }
 );
 
-/**
- * @type {HTMLElement}
- */
-let grab, base, img;
-let gx = 0,
-  gy = 5,
-  gw = 10,
-  gh = 10;
-let num = 1;
-for (let i = 0; i < num; i++) {
-  // base
-  base = MyTemplate.addTemplate(
-    document.getElementById("temp_PartBase"),
-    GameSpace
-  )[0];
 
-  // grabbable
-  MyHTML.addClass(base, "grabTarget");
-  grab = MyTemplate.addTemplate(
-    document.getElementById("temp_Grabbable"),
-    base
-  )[0];
-  grab.style.left = gx * System.Game.Scale + "px";
-  grab.style.top = gy * System.Game.Scale + "px";
-  grab.style.width = gw * System.Game.Scale + "px";
-  grab.style.height = gh * System.Game.Scale + "px";
 
-  // display
-  img = MyTemplate.addTemplate(
-    document.getElementById("temp_Displayable"),
-    base
-  )[0];
-
-  img.style.width = img.naturalWidth * System.Game.Scale + "px";
-  img.style.height = img.naturalHeight * System.Game.Scale + "px";
-}
-
-System.GrabSystem.MakeClassDraggable("grabTarget", "grabSource", GameSpace);
+GameSpace.appendChild(myFrame.htmlElement);
 
 // /**
 //  * @type {Parts.RoundConfig}

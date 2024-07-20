@@ -66,8 +66,8 @@ export default class MyDraggable {
   static MoveElBy(target, byX, byY, restriction) {
     this.MoveElTo(
       target,
-      target.offsetLeft + byX,
-      target.offsetTop + byY,
+      Number.parseFloat(target.style.left) + byX,
+      Number.parseFloat(target.style.top) + byY,
       restriction
     );
   }
@@ -86,11 +86,16 @@ export default class MyDraggable {
 
     moveTarget;
 
-    if (interactionTarget) {
+    if (!interactionTarget) {
       // if present, the header is where you move the DIV from:
-      // interactionTarget.onmousedown = dragMouseDown;
-      interactionTarget.addEventListener("mousedown", dragMouseDown);
-    } else moveTarget.addEventListener("mousedown", dragMouseDown);
+      interactionTarget = moveTarget;
+    }
+
+    interactionTarget.addEventListener("mousedown", dragMouseDown);
+
+    moveTarget.style.left =
+      getComputedStyle(moveTarget).getPropertyValue("left");
+    moveTarget.style.top = getComputedStyle(moveTarget).getPropertyValue("top");
 
     /**
      *
@@ -130,7 +135,6 @@ export default class MyDraggable {
       //   moveTarget,
       //   pos1,
       //   pos2,
-      //
       // );
 
       pos1 = ev.pageX - pos3;
@@ -142,7 +146,7 @@ export default class MyDraggable {
       MyDraggable.MoveElBy(
         moveTarget,
         pos1,
-        pos2, // TODO: make relativ
+        pos2,
         restTarget.getBoundingClientRect()
       );
     }
@@ -212,6 +216,8 @@ export default class MyDraggable {
   static GetOffset(el) {
     var _x = 0;
     var _y = 0;
+    // if you want to use this youll have to erase offsetLeft & offsetTop.
+    // both are Int, no decimals.
     while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
       _x += el.offsetLeft - el.scrollLeft;
       _y += el.offsetTop - el.scrollTop;

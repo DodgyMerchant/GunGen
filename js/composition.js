@@ -1,24 +1,43 @@
+import MyDraggable from "../myJS/MyDraggable.js";
+import MyHTML from "../myJS/MyHTML.js";
+import MyTemplate from "../myJS/MyTemplate.js";
 import { CALIBER, SLOTTYPE } from "./enums.js";
 import { Round, gunPart, partSlot } from "./parts.js";
-import { GunFactory } from "./system.js";
+import * as System from "./system.js";
 
 /**
- * @typedef {object} CompDisplayableConf the CompBulletContainer objects config object
- * @property {} img caliber enum name
+ * @typedef {object} CompDisplayableConf display config objj
+ * @property {string} imgSrc
  */
 /**
- * @typedef { } CompDisplayable
+ * @typedef { {
+ * htmlDisplayElement: HTMLImageElement;
+ * }} CompDisplayable
  */
 /**
  * making the part displayable.
- * @param {gunPart} state target obj
+ * @param {gunPart} base target obj
  * @param {CompDisplayableConf} conf config objects
  * @returns {CompDisplayable} component for something containing bullets.
  */
-export const Comp_Displayable = (state, conf) => {
+export const Comp_Displayable = (base, conf) => {
   let obj = {
-    htmlElement,
+    /**
+     * @type {HTMLImageElement}
+     */
+    htmlDisplayElement: undefined,
   };
+
+  // creating html
+  let img = MyTemplate.addTemplate(
+    document.getElementById("temp_Displayable"),
+    base.htmlElement
+  )[0];
+  obj.htmlDisplayElement = img;
+
+  img.src = conf.imgSrc;
+  img.style.width = img.naturalWidth * System.Game.Scale + "px";
+  img.style.height = img.naturalHeight * System.Game.Scale + "px";
 
   return obj;
 };
@@ -38,15 +57,16 @@ export const Comp_Displayable = (state, conf) => {
  * LoadCheckCal(cal: CALIBER): boolean;
  * LoadCheck(cal: CALIBER): any;
  * LoadAmmo(round: Round | Round[] | gunPart): number;
- * Extract(): Round | undefined;}} CompBulletContainer
+ * Extract(): Round | undefined;
+ * }} CompBulletContainer
  */
 /**
  * make a mag
- * @param {gunPart} state target obj
+ * @param {gunPart} base target obj
  * @param {CompBulContConf} conf config objects
  * @returns {CompBulletContainer} component for something containing bullets.
  */
-export const Comp_BulletContainer = (state, conf) => {
+export const Comp_BulletContainer = (base, conf) => {
   let obj = {
     /**
      * caliber
@@ -172,11 +192,11 @@ export const Comp_BulletContainer = (state, conf) => {
  */
 /**
  * Holds a bullet
- * @param {gunPart} state
+ * @param {gunPart} base
  * @param {CompBulletHoldConf} conf
  * @returns {CompBulletHolder}
  */
-export const Comp_BulletHolder = (state, conf) => {
+export const Comp_BulletHolder = (base, conf) => {
   let obj = {
     /**
      * caliber of the barrel
@@ -233,35 +253,62 @@ export const Comp_BulletHolder = (state, conf) => {
 
 /**
  * @typedef {object} CompGrabConf grabbable config obj.
- * @property {boolean} grabEnabled gabbable right now.
+ * @property {{x:number,y:number,w:number,h:number}} dimensions target of movement.
+ * @property {gunPart} [grabTarget] target of movement. leave undefind to make this components gunpart grabbale.
+ * @property {HTMLElement} [restrictions] target of movement.
  */
 /**
  * @typedef {{
- * grabEnabled: boolean;
- * grabActive: boolean;
+ * htmlGrabElement: htmlElement;
+ * grabCheck(): boolean;
  *}} CompGrabbable
  */
 /**
  * part that is grabbable by the mouse in some way.
  * a grabbable point that wont deatatch the part from the gun
  *
- * @param {gunPart} state
+ * @param {gunPart} base
  * @param {CompGrabConf} conf
  * @returns {CompGrabbable}
  */
-export const Comp_Grabbable = (state, conf) => {
+export const Comp_Grabbable = (base, conf) => {
   let obj = {
     /**
-     * can be crabbed right now
-     * @type {boolean}
+     * @type {htmlElement}
      */
-    grabEnabled: conf.grabEnabled,
+    htmlGrabElement: undefined,
     /**
      * is grabbed right now
-     * @type {boolean}
      */
-    grabActive: false,
+    grabCheck() {
+      return MyDraggable.GetDraggedObjs().indexOf(this.htmlElement) != -1;
+    },
   };
+
+  // conf modification
+  if (!conf.grabTarget) {
+    conf.grabTarget = base;
+  }
+
+  // make target grabbable
+  MyHTML.addClass(conf.grabTarget.htmlElement, "grabTarget");
+  let grab = MyTemplate.addTemplate(
+    document.getElementById("temp_Grabbable"),
+    base.htmlElement
+  )[0];
+  obj.htmlGrabElement = grab;
+
+  grab.style.left = conf.dimensions.x * System.Game.Scale + "px";
+  grab.style.top = conf.dimensions.y * System.Game.Scale + "px";
+  grab.style.width = conf.dimensions.w * System.Game.Scale + "px";
+  grab.style.height = conf.dimensions.h * System.Game.Scale + "px";
+
+  MyDraggable.MakeElementDraggable(
+    conf.grabTarget.htmlElement,
+    obj.htmlGrabElement,
+    conf.restrictions
+  );
+
   return obj;
 };
 
@@ -280,11 +327,11 @@ export const Comp_Grabbable = (state, conf) => {
  */
 /**
  *
- * @param {gunPart} state target obj
+ * @param {gunPart} base target obj
  * @param {CompAttachableConf} conf
  * @returns {CompAttachable} component for making a part attachable to another.
  */
-export const Comp_Attachable = (state, conf) => {
+export const Comp_Attachable = (base, conf) => {
   let obj = {
     /**
      * parent this gun part is attached to
@@ -347,22 +394,17 @@ export const Comp_Attachable = (state, conf) => {
 /**
  * component for a part that can host attachments.
  * hosts attach slots
- * @param {gunPart} state
+ * @param {gunPart} base
  * @param {CompAttHostConf} conf config objects
  * @returns {CompAttachHost}
  */
-export const Comp_AttachHost = (state, conf) => {
+export const Comp_AttachHost = (base, conf) => {
   let obj = {
     /**
      * the parts that make up the gun
      * @type {partSlot[]}
      */
     partSlotlist: conf.partSlotlist,
-
-    /**
-     *
-     */
-    constructor(conf) {},
   };
 
   obj.partSlotlist.forEach((slot) => {
@@ -381,11 +423,11 @@ export const Comp_AttachHost = (state, conf) => {
  */
 /**
  *
- * @param {gunPart} state target obj
+ * @param {gunPart} base target obj
  * @param {CompActionConf} conf
  * @returns component for making a part attachable to another.
  */
-export const Comp_Action = (state, conf) => {
+export const Comp_Action = (base, conf) => {
   let obj = {
     /**
      * parent this gun part is attached to
