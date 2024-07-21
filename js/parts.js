@@ -1,7 +1,7 @@
 import * as Components from "./composition.js";
 import { CALIBER, FIREMODE, ROUNDSTATES, SLOTTYPE } from "./enums.js";
 import MyMath from "../myJS/MyMath.js";
-import { GunFactory } from "./system.js";
+import { Game } from "./system.js";
 
 /**
  * @typedef {object} RoundConfig config object for a Round Object
@@ -38,9 +38,11 @@ export class Round {
 
 /**
  * @typedef {object} SlotConfig config object for a slot object
- * @prop {Components.CompAttachHost | undefined} parent parent object this object os attached to
- * @prop {Components.CompAttachable | undefined} child the child to attach, undefined if no child
- * @prop {SLOTTYPE | undefined} attachType type of attachment needed to connect
+ * @prop {Components.CompAttachHost} [parent] parent object this object os attached to
+ * @prop {Components.CompAttachable} [child] the child to attach, undefined if no child
+ * @prop {SLOTTYPE} [attachType] type of attachment needed to connect
+ * @prop {number} attachX attach point x axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
+ * @prop {number} attachY attach point y axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
  */
 /**
  * a slot to connect one part to another.
@@ -49,7 +51,7 @@ export class Round {
 export class partSlot {
   /**
    * parent object this object os attached to
-   * @type {import("./composition.js").CompAttachHost | undefined}
+   * @type {gunPart & Components.CompAttachHost | undefined}
    */
   parent;
 
@@ -61,9 +63,23 @@ export class partSlot {
 
   /**
    * the connected part
-   * @type {Components.CompAttachable | undefined }
+   * @type {gunPart & Components.CompAttachable | undefined }
    */
   child;
+
+  /**
+   * attach point x axis position in unscaled pixels relativ to gun part base.
+   * Scale referst to the game scale.
+   * @type {number}
+   */
+  attachX;
+
+  /**
+   * attach point y axis position in unscaled pixels relativ to gun part base.
+   * Scale referst to the game scale.
+   * @type {number}
+   */
+  attachY;
 
   /**
    * a attachment slot on another part.
@@ -71,6 +87,8 @@ export class partSlot {
    */
   constructor(config) {
     this.parent = config.parent;
+    this.attachX = config.attachX;
+    this.attachY = config.attachY;
 
     if (config.child && !config.attachType) {
       //auto get attach type by child
@@ -80,19 +98,21 @@ export class partSlot {
       this.attachType = config.attachType;
     }
 
+    // adding children needed to be delayed until the base obj is ready. so it can add the html element.
     if (config.child) {
-      config.child.Attach(this);
+      if (this.parent) config.child.Attach(this);
+      else this._attach(config.child);
     }
   }
 
   /**
    * set child variable to gunpart.
    * perform this action from child.
-   * @param {Components.CompAttachable} part
+   * @param {gunPart & Components.CompAttachable} part
    * @returns {boolean} is successful
    */
   _attach(part) {
-    if (!this.child) {
+    if (!this.child || this.child == part) {
       this.child = part;
       return true;
     }
@@ -102,7 +122,7 @@ export class partSlot {
   /**
    * detach connected child.
    * perform this action from child.
-   * @param {Components.CompAttachable} part
+   * @param {gunPart & Components.CompAttachable} part
    * @returns {boolean} is successful
    */
   _detach(part) {
@@ -112,7 +132,7 @@ export class partSlot {
 
   /**
    * perform attach on child and itself.
-   * @param {Components.CompAttachable} part part to detach
+   * @param {gunPart & Components.CompAttachable} part part to detach
    * @returns {boolean} is successful
    */
   Attach(part) {
@@ -122,7 +142,7 @@ export class partSlot {
 
   /**
    * perform detatch on child and itself.
-   * @param {Components.CompAttachable} part part to detach
+   * @param {gunPart & Components.CompAttachable} part part to detach
    * @returns {boolean} is successful
    */
   Detach(part) {
@@ -163,6 +183,7 @@ export class partRail extends partSlot {
 
 /**
  * @typedef {object} PartConf properties for the gunPart objects config Object
+ * @property {Game} game name of the gun model
  * @property {string} model name of the gun model
  */
 /**
@@ -170,13 +191,17 @@ export class partRail extends partSlot {
  */
 export class gunPart {
   /**
+   * refrence for game instance.
+   */
+  game;
+  /**
    * name of the gun model
    * @type {string}
    */
   model;
 
   /**
-   * @type {htmlElement}
+   * @type {HTMLElement}
    */
   htmlElement;
 
@@ -185,6 +210,7 @@ export class gunPart {
    * @param {PartConf} conf config objects
    */
   constructor(conf, htmlElement) {
+    this.game = conf.game;
     this.model = conf.model;
     this.htmlElement = htmlElement;
   }
@@ -198,7 +224,7 @@ export class gunPart {
   }
 
   toString() {
-    return `GunPart: ${this.model}`;
+    return `${this.model}`;
   }
 }
 

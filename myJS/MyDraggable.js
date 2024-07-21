@@ -93,9 +93,10 @@ export default class MyDraggable {
 
     interactionTarget.addEventListener("mousedown", dragMouseDown);
 
-    moveTarget.style.left =
-      getComputedStyle(moveTarget).getPropertyValue("left");
-    moveTarget.style.top = getComputedStyle(moveTarget).getPropertyValue("top");
+    let str = getComputedStyle(moveTarget).getPropertyValue("left");
+    moveTarget.style.left = str == "" ? "0px" : str;
+    str = getComputedStyle(moveTarget).getPropertyValue("top");
+    moveTarget.style.top = str == "" ? "0px" : str;
 
     /**
      *
