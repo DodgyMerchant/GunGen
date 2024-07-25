@@ -46,8 +46,10 @@ export const Comp_Displayable = (base, conf) => {
   obj.htmlDisplayElement = img;
 
   img.src = conf.imgSrc;
-  img.style.width = img.naturalWidth * base.game.Scale + "px";
-  img.style.height = img.naturalHeight * base.game.Scale + "px";
+  img.addEventListener("load", (ev) => {
+    img.style.width = img.naturalWidth * base.game.Scale + "px";
+    img.style.height = img.naturalHeight * base.game.Scale + "px";
+  });
 
   if (conf.zIndex) obj.zIndex = conf.zIndex;
 

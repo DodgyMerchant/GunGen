@@ -155,36 +155,10 @@ export class partSlot {
   }
 }
 
-export class partRail extends partSlot {
-  /**
-   * the connected gunparts
-   * @type {gunPart[]}
-   */
-  childList;
-
-  /**
-   * detach the part from the list
-   * @param {gunPart} part part to detach
-   */
-  // _detach(part) {
-  //   MyArray.remove(this.childList, part);
-  //   let a = { i: 0 };
-  //   a;
-  // }
-
-  /**
-   * attach the part to the list
-   * @param {gunPart} part part to detach
-   */
-  // _attach(attach) {
-  // TODO attach part to rail
-  // }
-}
-
 /**
  * @typedef {object} PartConf properties for the gunPart objects config Object
  * @property {Game} game name of the gun model
- * @property {string} model name of the gun model
+ * @property {string} modelName name of the gun model
  */
 /**
  * base gun part of a gun.
@@ -198,7 +172,7 @@ export class gunPart {
    * name of the gun model
    * @type {string}
    */
-  model;
+  modelName;
 
   /**
    * @type {HTMLElement}
@@ -211,7 +185,7 @@ export class gunPart {
    */
   constructor(conf, htmlElement) {
     this.game = conf.game;
-    this.model = conf.model;
+    this.modelName = conf.modelName;
     this.htmlElement = htmlElement;
   }
 
@@ -220,11 +194,11 @@ export class gunPart {
    * @returns {string} name of gunpart
    */
   GetDisplayName() {
-    return this.model;
+    return this.modelName;
   }
 
   toString() {
-    return `${this.model}`;
+    return `${this.modelName}`;
   }
 }
 
@@ -244,8 +218,8 @@ export class gunPart_Barrel extends gunPart {
    */
   length;
 
-  constructor(parent, model, partSlotlist, caliber, length) {
-    super(parent, model, partSlotlist);
+  constructor(parent, modelName, partSlotlist, caliber, length) {
+    super(parent, modelName, partSlotlist);
     this.caliber = caliber;
     this.length = length;
   }

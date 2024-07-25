@@ -25,7 +25,7 @@ const Game = new System.Game({
 let myFrame = System.GunFactory.Make_FramePistol(
   {
     game: Game,
-    model: "Pistol Frame",
+    modelName: "Pistol Frame",
   },
   {
     imgSrc: "assets/gun1.png",
@@ -39,7 +39,7 @@ let myFrame = System.GunFactory.Make_FramePistol(
         child: System.GunFactory.Make_Magazine(
           {
             game: Game,
-            model: "Pistol Magazine",
+            modelName: "Pistol Magazine",
           },
           {
             imgSrc: "assets/mag1.png",
@@ -70,4 +70,4 @@ let myFrame = System.GunFactory.Make_FramePistol(
 
 Game.addGunPart(myFrame);
 
-Game.detatch(myFrame.partSlotlist[0].child);
+// Game.detatch(myFrame.partSlotlist[0].child);
