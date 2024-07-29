@@ -3,7 +3,7 @@ import * as Parts from "./parts.js";
 import * as Components from "./composition.js";
 import MyHTML from "../myJS/MyHTML.js";
 import MyArr from "../myJS/MyArr.js";
-import GrabSystem from "./GrabSystem.js";
+import InteractionSystem from "./InteractionSystem.js";
 
 /**
  * @typedef {object} GameSpaceConfig gameconfig object
@@ -250,7 +250,7 @@ export class Game {
    */
   MainLoop() {
     // let TestObjs = this.GameSpace.children;
-    // let DraggedObj = GrabSystem.GetDraggedObjs();
+    // let DraggedObj = InteractionSystem.GetDraggedObjs();
     // let spd = 1;
     // let GameRect = this.GameSpace.getBoundingClientRect();
     // let target = {
@@ -273,7 +273,7 @@ export class Game {
     //   if (!(rect.x == target.x && rect.y == target.y)) {
     //     let ang = MyMath.pointAngle(rect.x, rect.y, target.x, target.y);
     //     newPoint = MyMath.findNewPoint(rect.x, rect.y, ang, spd);
-    //     GrabSystem.MoveElTo(
+    //     InteractionSystem.MoveElTo(
     //       element,
     //       MyMath.ovsh(rect.x, newPoint.x, target.x),
     //       MyMath.ovsh(rect.y, newPoint.y, target.y),
@@ -366,7 +366,7 @@ export class Game {
   detatch(target) {
     let parent = target.htmlElement.parentElement;
     this.GameSpace.HtmlElement.appendChild(target.htmlElement);
-    GrabSystem.MoveElTo(
+    InteractionSystem.MoveElTo(
       target.htmlElement,
       Number.parseFloat(parent.style.left) +
         Number.parseFloat(target.htmlElement.style.left),

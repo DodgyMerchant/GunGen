@@ -40,7 +40,7 @@ if left empty no target will be given and functionality ignored/not setup.
 TODO: give attachable component own intput box like grabbable. Split functionality.
 TODO: combin the gab and attach component like you do with components already.
 TODO: change the GRAB system to an interact system.
-TODO: MakeElementDraggable param the functions used for mouse press. everything from there happens in that function anyways.
+TODO: MakeElementInteractable param the functions used for mouse press. everything from there happens in that function anyways.
 */
 
 let myFrame = System.GunFactory.Make_FrameGrip(

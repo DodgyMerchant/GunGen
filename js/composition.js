@@ -1,7 +1,11 @@
 import MyHTML from "../myJS/MyHTML.js";
 import { CALIBER, SLOTTYPE } from "./enums.js";
-import GrabSystem from "./GrabSystem.js";
+import InteractionSystem from "./InteractionSystem.js";
 import { Round, gunPart, partSlot } from "./parts.js";
+
+const GrabTargetClass = "GunGen-grabTarget";
+const GrabSourceClass = "GunGen-grabSource";
+const AttachableClass = "GunGen-attachable";
 
 /**
  * @typedef {object} CompDisplayableConf display config objj
@@ -315,21 +319,22 @@ export const Comp_Grabbable = (base, conf) => {
      * is grabbed right now
      */
     grabCheck() {
-      return GrabSystem.GetDraggedObjs().indexOf(this.htmlElement) != -1;
+      return InteractionSystem.GetDraggedObjs().indexOf(this.htmlElement) != -1;
     },
   };
 
   // make target grabbable
-  if (!conf.grabTarget) {
-    conf.grabTarget = base;
-  }
+  let moveTarget = conf.grabTarget
+    ? conf.grabTarget.htmlElement
+    : base.htmlElement;
+
   // make target grabbable
-  conf.grabTarget.htmlElement.classList.add("GunGen-grabTarget");
+  moveTarget.classList.add(GrabTargetClass);
 
   // set grabHost
   if (typeof conf.grabHost !== "undefined") obj.grabHost = conf.grabHost;
 
-  // create handle
+  // ----- create handle -----
   let grab;
 
   //create handle if handle dimensions are specified. If not the base elelemnt will be the handle.
@@ -346,17 +351,96 @@ export const Comp_Grabbable = (base, conf) => {
     grab = base.htmlElement;
   }
 
-  grab.classList.add("GunGen-grabSource");
+  grab.classList.add(GrabSourceClass);
   obj.htmlGrabElement = grab;
 
-  GrabSystem.MakeElementDraggable(
-    base,
-    conf.grabTarget.htmlElement,
-    grab,
+  var pos1 = 0,
+    pos2 = 0,
+    pos3 = 0,
+    pos4 = 0;
+  var button = undefined;
+
+  var restTarget =
     conf.restrictions !== undefined
       ? conf.restrictions
-      : base.game.GameSpace.HtmlElement
-  );
+      : base.game.GameSpace.HtmlElement;
+
+  /**
+   *
+   * @param {MouseEvent} ev
+   */
+  function dragMouseDown(ev) {
+    ev = ev || window.event;
+    // ev.preventDefault();
+
+    switch (ev.button) {
+      case 2: // right mb
+        if (base.parent?.detachable !== true) {
+          break;
+        }
+        base.Detach();
+      case 0: // left mb
+        pos3 = ev.pageX;
+        pos4 = ev.pageY;
+
+        document.addEventListener("mouseup", closeDragElement);
+        document.addEventListener("mousemove", elementDrag);
+
+        InteractionSystem._addDraggable(base);
+
+        button = ev.button;
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  /**
+   *
+   * @param {MouseEvent} ev
+   */
+  function elementDrag(ev) {
+    ev = ev || window.event;
+    // ev.preventDefault();
+
+    //check for parent drag status
+    // if (base.parent?.grabHosted !== true) {
+    //   closeDragElement(ev);
+    //   return;
+    // }
+
+    pos1 = ev.pageX - pos3;
+    pos2 = ev.pageY - pos4;
+    pos3 = ev.pageX;
+    pos4 = ev.pageY;
+
+    // set the element's new position:
+    InteractionSystem.MoveElBy(
+      moveTarget,
+      pos1,
+      pos2,
+      restTarget.getBoundingClientRect()
+    );
+  }
+
+  /**
+   *
+   * @param {MouseEvent} ev
+   */
+  function closeDragElement(ev) {
+    // stop moving when mouse button is released:
+
+    if (ev.button != button) return;
+
+    document.removeEventListener("mouseup", closeDragElement);
+    document.removeEventListener("mousemove", elementDrag);
+
+    InteractionSystem._removeDraggable(base);
+    button = undefined;
+  }
+
+  InteractionSystem.MakeElementInteractable(dragMouseDown, moveTarget, grab);
 
   return obj;
 };
@@ -470,7 +554,7 @@ export const Comp_Attachable = (base, conf) => {
     },
   };
 
-  base.htmlElement.classList.add("GunGen-attachable");
+  base.htmlElement.classList.add(AttachableClass);
 
   if (conf.parent) {
     obj.Attach(conf.parent);
@@ -515,12 +599,6 @@ export const Comp_AttachHost = (base, conf) => {
     slot.parent = base;
     slot.child?.Attach(slot);
   });
-
-  // create html
-  // let host = document.createElement("div");
-  // host.classList.add("GunGen-attachHost");
-  // base.htmlElement.appendChild(host);
-  // obj.htmlHostElement = host;
 
   return obj;
 };
