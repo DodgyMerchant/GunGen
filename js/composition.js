@@ -1,18 +1,17 @@
-import MyDraggable from "../myJS/MyDraggable.js";
 import MyHTML from "../myJS/MyHTML.js";
-import MyTemplate from "../myJS/MyTemplate.js";
 import { CALIBER, SLOTTYPE } from "./enums.js";
+import GrabSystem from "./GrabSystem.js";
 import { Round, gunPart, partSlot } from "./parts.js";
 
 /**
  * @typedef {object} CompDisplayableConf display config objj
  * @property {string} imgSrc
- * @property {string} [zIndex]
  */
 /**
  * @typedef { {
  * htmlDisplayElement: HTMLImageElement;
- * zIndex: number;
+ * imgLoadPromise: Promise<void>;
+ * src: string;
  * }} CompDisplayable
  */
 /**
@@ -22,36 +21,49 @@ import { Round, gunPart, partSlot } from "./parts.js";
  * @returns {CompDisplayable} component for something containing bullets.
  */
 export const Comp_Displayable = (base, conf) => {
-  let obj = {
-    /**
-     * @type {HTMLImageElement}
-     */
-    htmlDisplayElement: undefined,
-
-    get zIndex() {
-      return parseInt(this.htmlDisplayElement.style.zIndex);
-    },
-    /**
-     * @param {number} num
-     */
-    set zIndex(num) {
-      this.htmlDisplayElement.style.zIndex = num + "";
-    },
-  };
-
   // create html
   let img = document.createElement("img");
   img.classList.add("GunGen-sprite");
   base.htmlElement.appendChild(img);
-  obj.htmlDisplayElement = img;
 
-  img.src = conf.imgSrc;
-  img.addEventListener("load", (ev) => {
-    img.style.width = img.naturalWidth * base.game.Scale + "px";
-    img.style.height = img.naturalHeight * base.game.Scale + "px";
-  });
+  // img.src = conf.imgSrc;
 
-  if (conf.zIndex) obj.zIndex = conf.zIndex;
+  let obj = {
+    /**
+     *
+     */
+    htmlDisplayElement: img,
+
+    /**
+     * Promise that is fulfilled of the image is loaded.
+     * @type {Promise<void>}
+     */
+    imgLoadPromise: undefined,
+
+    get src() {
+      return this.htmlDisplayElement.src;
+    },
+    set src(str) {
+      if (this.htmlDisplayElement.src != str) {
+        this.htmlDisplayElement.src = str;
+        this._resetPromise();
+      }
+    },
+
+    _resetPromise() {
+      this.imgLoadPromise = MyHTML.createPromiseFromDomEvent(
+        this.htmlDisplayElement,
+        "load"
+      ).then(() => {
+        console.log("img load!");
+        let img = this.htmlDisplayElement;
+        img.style.width = img.naturalWidth * base.game.Scale + "px";
+        img.style.height = img.naturalHeight * base.game.Scale + "px";
+      });
+    },
+  };
+
+  obj.src = conf.imgSrc;
 
   return obj;
 };
@@ -69,7 +81,7 @@ export const Comp_Displayable = (base, conf) => {
  * contents: Round[];
  * LoadCheckCap(): boolean;
  * LoadCheckCal(cal: CALIBER): boolean;
- * LoadCheck(cal: CALIBER): any;
+ * LoadCheck(cal: CALIBER): boolean;
  * LoadAmmo(round: Round | Round[] | gunPart): number;
  * Extract(): Round | undefined;
  * }} CompBulletContainer
@@ -193,7 +205,7 @@ export const Comp_BulletContainer = (base, conf) => {
  * @typedef {object} CompBulletHoldConf grabbable config obj.
  * @property {CALIBER} caliber caliber of the barrel
  * @property {partSlot | CompBulletContainer} source source of ammunition. If mag is detachable supply the attach slot.
- * @property {Round | undefined} heldRound held round
+ * @property {Round} [heldRound] held round
  */
 /**
  * @typedef { {
@@ -270,11 +282,12 @@ export const Comp_BulletHolder = (base, conf) => {
  * @property {{x:number, y:number, w:number, h:number}} [handleDimensions] grabbable area dimenesions. leave empty for entire part.
  * @property {gunPart} [grabTarget] target of movement. leave undefind to make this components gunpart grabbale.
  * @property {HTMLElement} [restrictions] restrict movement to element dimensions.
- * @property {boolean} [grabHost] grabbable if connected to a host. default true
+ * @property {boolean} [grabHosted] grabbable if connected to a host. default true
  */
 /**
  * @typedef {{
  * htmlGrabElement: HTMLElement;
+ * grabHosted: boolean;
  * grabCheck(): boolean;
  *}} CompGrabbable
  */
@@ -296,13 +309,13 @@ export const Comp_Grabbable = (base, conf) => {
     /**
      * grabbable if connected to a host.
      */
-    grabHost: true,
+    grabHosted: conf.grabHosted ? conf.grabHosted : false,
 
     /**
      * is grabbed right now
      */
     grabCheck() {
-      return MyDraggable.GetDraggedObjs().indexOf(this.htmlElement) != -1;
+      return GrabSystem.GetDraggedObjs().indexOf(this.htmlElement) != -1;
     },
   };
 
@@ -319,6 +332,7 @@ export const Comp_Grabbable = (base, conf) => {
   // create handle
   let grab;
 
+  //create handle if handle dimensions are specified. If not the base elelemnt will be the handle.
   if (conf.handleDimensions) {
     // create handle
     grab = document.createElement("div");
@@ -335,10 +349,13 @@ export const Comp_Grabbable = (base, conf) => {
   grab.classList.add("GunGen-grabSource");
   obj.htmlGrabElement = grab;
 
-  MyDraggable.MakeElementDraggable(
+  GrabSystem.MakeElementDraggable(
+    base,
     conf.grabTarget.htmlElement,
     grab,
-    conf.restrictions
+    conf.restrictions !== undefined
+      ? conf.restrictions
+      : base.game.GameSpace.HtmlElement
   );
 
   return obj;
@@ -356,8 +373,12 @@ export const Comp_Grabbable = (base, conf) => {
  * @typedef {{
  * parent: partSlot;
  * attachType: SLOTTYPE;
+ * attachX: number;
+ * attachY: number;
+ * CheckAttached(): boolean;
  * Attach(target: partSlot): boolean;
- * Detach(): boolean;}} CompAttachable
+ * Detach(): boolean;
+ * }} CompAttachable
  */
 /**
  *
@@ -394,21 +415,37 @@ export const Comp_Attachable = (base, conf) => {
     attachY: conf.attachY,
 
     /**
+     * returns if attached.
+     * @returns returns if attached bool.
+     */
+    CheckAttached() {
+      return this.parent !== undefined;
+    },
+
+    /**
      * attach to a part slot.
      * checks attach type.
      * @param {partSlot} target to attach to
      * @return {boolean} if attached successfully
      */
     Attach(target) {
-      if (!this.parent && target.attachType == this.attachType) {
+      if (!this.CheckAttached() && target.attachType == this.attachType) {
         if (target._attach(this)) {
           this.parent = target;
 
-          // html
+          // ----- html ------
           this.parent.parent.htmlElement.appendChild(this.htmlElement);
 
+          // move position to attach x/y
+          this.htmlElement.style.top =
+            (this.parent.attachY - this.attachY) * this.game.Scale + "px";
+          this.htmlElement.style.left =
+            (this.parent.attachX - this.attachX) * this.game.Scale + "px";
+
+          this.zIndex = this.parent.zIndex;
+
           console.log(
-            `connected: \"${this.parent.parent.toString()}\" with: \"${this.toString()}\"`
+            `connected: \"${this.toString()}\" with: \"${this.parent.parent.toString()}\"`
           );
           return true;
         }
@@ -421,8 +458,11 @@ export const Comp_Attachable = (base, conf) => {
      *
      */
     Detach() {
-      if (this.parent && this.parent._detach(this)) {
-        this.parent.parent.htmlElement.removeChild(this.htmlElement);
+      if (this.CheckAttached() && this.parent._detach(this)) {
+        console.log(
+          `detached: \"${this.toString()}\" with: \"${this.parent.parent.toString()}\"`
+        );
+        this.game.detatch(this);
         this.parent = undefined;
         return true;
       }
@@ -440,9 +480,6 @@ export const Comp_Attachable = (base, conf) => {
 };
 
 /**
- * @typedef {"over"|"under"} ZIndexBehavior
- */
-/**
  * @typedef {object} CompAttHostConf properties for the component that can host attachments.
  * @property {} partSlotlist the Slots to connect parts to. Will set parent of child slots.
  * @property {partSlot[]} partSlotlist the Slots to connect parts to. Will set parent of child slots.
@@ -450,7 +487,6 @@ export const Comp_Attachable = (base, conf) => {
 /**
  * @typedef {{
  * partSlotlist: partSlot[];
- * constructor(conf: any): void;
  * }} CompAttachHost component for a part that can host attachments.
  */
 /**

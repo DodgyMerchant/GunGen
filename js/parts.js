@@ -2,6 +2,7 @@ import * as Components from "./composition.js";
 import { CALIBER, FIREMODE, ROUNDSTATES, SLOTTYPE } from "./enums.js";
 import MyMath from "../myJS/MyMath.js";
 import { Game } from "./system.js";
+import MyHTML from "../myJS/MyHTML.js";
 
 /**
  * @typedef {object} RoundConfig config object for a Round Object
@@ -41,6 +42,8 @@ export class Round {
  * @prop {Components.CompAttachHost} [parent] parent object this object os attached to
  * @prop {Components.CompAttachable} [child] the child to attach, undefined if no child
  * @prop {SLOTTYPE} [attachType] type of attachment needed to connect
+ * @prop {number} [zIndex] z index of the connected child.
+ * @prop {boolean} [detachable] if child is detachable by direct action (f.e. player richt mouse click).
  * @prop {number} attachX attach point x axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
  * @prop {number} attachY attach point y axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
  */
@@ -82,6 +85,17 @@ export class partSlot {
   attachY;
 
   /**
+   * dictates of connected childs z index will be over or under the parent. Should not be zero.
+   * @type {number}
+   */
+  zIndex = 0;
+
+  /**
+   * if child is detachable by direct action (f.e. player richt mouse click).
+   */
+  detachable = true;
+
+  /**
    * a attachment slot on another part.
    * @param {SlotConfig} config
    */
@@ -92,17 +106,20 @@ export class partSlot {
 
     if (config.child && !config.attachType) {
       //auto get attach type by child
-
       this.attachType = config.child.attachType;
     } else {
       this.attachType = config.attachType;
     }
 
+    if (config.detachable !== undefined) this.detachable = config.detachable;
+
     // adding children needed to be delayed until the base obj is ready. so it can add the html element.
     if (config.child) {
       if (this.parent) config.child.Attach(this);
-      else this._attach(config.child);
+      else this.child = config.child;
     }
+
+    if (config.zIndex) this.zIndex = config.zIndex;
   }
 
   /**
@@ -155,6 +172,66 @@ export class partSlot {
   }
 }
 
+export class htmlObj {
+  /**
+   * @type {HTMLElement}
+   */
+  htmlElement;
+  /**
+   * width
+   */
+  get Width() {
+    return this.htmlElement.getBoundingClientRect().width;
+    // return parseFloat(MyHTML.getPropertyFlt(this.htmlElement, "width"));
+    // return parseFloat(this.htmlElement.style.width);
+  }
+  /**
+   * width
+   */
+  set Width(value) {
+    this.htmlElement.style.width = value + "px";
+  }
+  /**
+   * Height
+   */
+  get Height() {
+    return this.htmlElement.getBoundingClientRect().height;
+    // return parseFloat(MyHTML.getPropertyFlt(this.htmlElement, "height"));
+    // return parseFloat(this.htmlElement.style.height);
+  }
+  /**
+   * Height
+   */
+  set Height(value) {
+    this.htmlElement.style.height = value + "px";
+  }
+
+  _zIndex;
+  /**
+   * read only. tracks the z index.
+   * @type {number}
+   */
+  get zIndex() {
+    return this._zIndex;
+  }
+  set zIndex(value) {
+    this._zIndex = value;
+    // set style
+    // if (value == 0) this.htmlElement.style.zIndex = "auto";
+    // else
+    this.htmlElement.style.zIndex = value + "";
+  }
+
+  /**
+   * base obj
+   * @param {HTMLElement} htmlElement
+   */
+  constructor(htmlElement, zIndex) {
+    this.htmlElement = htmlElement;
+    this.zIndex = zIndex;
+  }
+}
+
 /**
  * @typedef {object} PartConf properties for the gunPart objects config Object
  * @property {Game} game name of the gun model
@@ -163,7 +240,7 @@ export class partSlot {
 /**
  * base gun part of a gun.
  */
-export class gunPart {
+export class gunPart extends htmlObj {
   /**
    * refrence for game instance.
    */
@@ -175,18 +252,18 @@ export class gunPart {
   modelName;
 
   /**
-   * @type {HTMLElement}
-   */
-  htmlElement;
-
-  /**
    * base gun part of a gun
    * @param {PartConf} conf config objects
+   * @param {HTMLElement} htmlElement config objects
+   * @param {number} [zIndex] z index of the object
    */
-  constructor(conf, htmlElement) {
+  constructor(conf, htmlElement, zIndex) {
+    super(
+      htmlElement,
+      zIndex !== undefined ? zIndex : conf.game.GameSpace.ZIndDef
+    );
     this.game = conf.game;
     this.modelName = conf.modelName;
-    this.htmlElement = htmlElement;
   }
 
   /**
@@ -317,31 +394,6 @@ class gunPart_Top extends gunPart {
     ) {
       console.log("EJECT ROUND");
     }
-  }
-}
-/**
- * @typedef {object} BoltProp properties for the gunPart_Bolt objects config Object.
- * @property {boolean} openBolt open or closed bolt
- */
-/**
- * reciprocating bolt
- */
-export class gunPart_Bolt extends gunPart_Top {
-  /**
-   * open or clodesed bolt
-   * @type {boolean}
-   */
-  openBolt;
-
-  /**
-   * pistol bolt
-   * @param {gunPart} parent parent this gun part is attached to
-   * @param {BoltProp} conf config objects
-   */
-  constructor(parent, conf) {
-    super(blowback, springLoaded);
-
-    this.openBolt = conf.openBolt;
   }
 }
 /**

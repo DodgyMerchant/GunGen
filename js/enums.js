@@ -33,6 +33,7 @@ export class SLOTTYPE extends MyEnum {
   static PistolBolt = new SLOTTYPE("stPistolBolt", "pistol bolt");
   static PistolGrip = new SLOTTYPE("stPistolGrip", "pistol grip");
   static PistolMag = new SLOTTYPE("stPistolMagazine", "pistol magazine");
+  static PistolBarrel = new SLOTTYPE("stPistolBarrel", "pistol barrel");
   static PistolSlideStop = new SLOTTYPE("stPistolMagazine", "pistol magazine");
   static PistolSelector = new SLOTTYPE("stPistolFireSelector", "pistol fire selector");
   static PistolHammer = new SLOTTYPE("stPistolHammer", "pistol hammer");

@@ -1,6 +1,6 @@
 /**
  * general html handling object
- * @version 1.0.1
+ * @version 1.0.2
  * @author Dodgy_Merchant <admin@dodgymerchant.dev>
  */
 export default class MyHTML {
@@ -220,7 +220,6 @@ export default class MyHTML {
    * @param {string} childName
    */
   static getChildById(parentEl, childName) {
-
     let leng = parentEl.children.length;
     /**
      * @type {HTMLElement}
@@ -237,4 +236,31 @@ export default class MyHTML {
 
     return undefined;
   }
+
+  /**
+   *
+   * @param {EventTarget} eventTarget
+   * @param {keyof HTMLElementEventMap} eventName
+   * @param {()=>{}} run
+   */
+  static createPromiseFromDomEvent = (
+    eventTarget,
+    eventName,
+    run = undefined
+  ) =>
+    new Promise((resolve, reject) => {
+      const handleEvent = () => {
+        eventTarget.removeEventListener(eventName, handleEvent);
+
+        resolve();
+      };
+
+      eventTarget.addEventListener(eventName, handleEvent);
+
+      try {
+        if (run) run();
+      } catch (err) {
+        reject(err);
+      }
+    });
 }

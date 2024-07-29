@@ -1,18 +1,10 @@
 body {
-  --scale: 4;
-}
-
-body {
   color: white;
   background: black;
 }
 
 #GameWindow {
   position: relative;
-  --w: 600px;
-  --h: 600px;
-  width: var(--w);
-  height: var(--h);
 
   background: lightgray;
 }
@@ -46,9 +38,9 @@ body {
 .GunGen-grabSource {
   position: absolute;
   cursor: move;
-  z-index: 999;
+  /* z-index: 999; */
 
-  background-color: rgba(255, 0, 0, 0.26);
+  background-color: rgba(255, 0, 0, 0.116);
 }
 
 .GunGen-attachHost {

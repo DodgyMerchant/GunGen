@@ -1,13 +1,20 @@
-import MyArr from "./MyArr.js";
-import MyMath from "./MyMath.js";
+import MyArr from "../myJS/MyArr.js";
+import MyMath from "../myJS/MyMath.js";
+import { gunPart } from "./parts.js";
+import * as Composition from "./composition.js";
+
+function Implication(A, B) {
+  if (A) {
+    return B;
+  } else {
+    /* if A is false, the implication is true */ return true;
+  }
+}
 
 /**
- * HTMLleemnt mouse draggable handling class.
- * Has only static functions.
- * @version 1.0.0
- * @author Dodgy_Merchant <admin@dodgymerchant.dev>
+ * custom drag system.
  */
-export default class MyDraggable {
+export default class GrabSystem {
   /**
    * Array of dragged items.
    * @type {HTMLElement[]}
@@ -74,15 +81,23 @@ export default class MyDraggable {
 
   /**
    * make one element draggable.
+   * @param {gunPart & Composition.CompGrabbable} gunObj
    * @param {HTMLElement} moveTarget the element that will be dragged.
    * @param {HTMLElement} [interactionTarget] the elent clicked on to enter dragging state.
    * @param {HTMLElement} [restTarget] parent element that restricts the area.
    */
-  static MakeElementDraggable(moveTarget, interactionTarget, restTarget) {
+  static MakeElementDraggable(
+    gunObj,
+    moveTarget,
+    interactionTarget,
+    restTarget
+  ) {
     var pos1 = 0,
       pos2 = 0,
       pos3 = 0,
       pos4 = 0;
+
+    var button = undefined;
 
     moveTarget;
 
@@ -93,6 +108,7 @@ export default class MyDraggable {
 
     interactionTarget.addEventListener("mousedown", dragMouseDown);
 
+    // exposing position for faster later edits.
     let str = getComputedStyle(moveTarget).getPropertyValue("left");
     moveTarget.style.left = str == "" ? "0px" : str;
     str = getComputedStyle(moveTarget).getPropertyValue("top");
@@ -104,18 +120,29 @@ export default class MyDraggable {
      */
     function dragMouseDown(ev) {
       ev = ev || window.event;
-      ev.preventDefault();
+      // ev.preventDefault();
 
-      pos3 = ev.pageX;
-      pos4 = ev.pageY;
+      switch (ev.button) {
+        case 2: // right mb
+          if (gunObj.parent?.detachable !== true) {
+            break;
+          }
+          gunObj.Detach();
+        case 0: // left mb
+          pos3 = ev.pageX;
+          pos4 = ev.pageY;
 
-      document.addEventListener("mouseup", closeDragElement);
-      document.addEventListener("mousemove", elementDrag);
+          document.addEventListener("mouseup", closeDragElement);
+          document.addEventListener("mousemove", elementDrag);
 
-      // document.onmouseup = closeDragElement.bind(document, [this]);
-      // document.onmousemove = elementDrag.bind(document, [this]);
+          GrabSystem._addDraggable(moveTarget);
 
-      MyDraggable._addDraggable(moveTarget);
+          button = ev.button;
+          break;
+
+        default:
+          break;
+      }
     }
 
     /**
@@ -124,7 +151,14 @@ export default class MyDraggable {
      */
     function elementDrag(ev) {
       ev = ev || window.event;
-      ev.preventDefault();
+      // ev.preventDefault();
+
+      //check for parent drag status
+      if (!Implication(gunObj.parent, gunObj.grabHosted)) {
+        closeDragElement(ev);
+        return;
+      }
+
       // calculate the new cursor position:
       // pos1 = ev.clientX - pos3;
       // pos2 = ev.clientY - pos4;
@@ -132,7 +166,7 @@ export default class MyDraggable {
       // pos4 = ev.clientY;
 
       // set the element's new position:
-      // MyDraggable.MoveElBy(
+      // GrabSystem.MoveElBy(
       //   moveTarget,
       //   pos1,
       //   pos2,
@@ -144,7 +178,7 @@ export default class MyDraggable {
       pos4 = ev.pageY;
 
       // set the element's new position:
-      MyDraggable.MoveElBy(
+      GrabSystem.MoveElBy(
         moveTarget,
         pos1,
         pos2,
@@ -159,47 +193,29 @@ export default class MyDraggable {
     function closeDragElement(ev) {
       // stop moving when mouse button is released:
 
+      if (ev.button != button) return;
+
       document.removeEventListener("mouseup", closeDragElement);
       document.removeEventListener("mousemove", elementDrag);
 
-      MyDraggable._removeDraggable(moveTarget);
+      GrabSystem._removeDraggable(moveTarget);
+      button = undefined;
     }
   }
 
   /**
-   * makes all element of a class draggable.
-   * @param {string} moveClass class name of the element that will be dragged.
-   * @param {string} interClass class name of the elent clicked on to enter dragging state.
-   * @param {HTMLElement} [restTarget] parent element that restricts the area.
-   */
-  static MakeClassDraggable(moveClass, interClass, restTarget) {
-    let objs = document.getElementsByClassName(moveClass),
-      obj;
-
-    for (let i = 0; i < objs.length; i++) {
-      obj = objs[i];
-      this.MakeElementDraggable(
-        obj,
-        obj.getElementsByClassName(interClass)[0],
-        restTarget
-      );
-      console.log("Made Draggable: ", obj);
-    }
-  }
-
-  /**
-   *
+   * adds target as draged instance.
    * @param {any} any
    */
   static _addDraggable(any) {
-    MyDraggable._dragArr.push(any);
+    this._dragArr.push(any);
   }
   /**
    *
    * @param {any} any
    */
   static _removeDraggable(any) {
-    MyArr.removeEntry(MyDraggable._dragArr, any);
+    MyArr.removeEntry(this._dragArr, any);
   }
 
   /**
@@ -207,7 +223,7 @@ export default class MyDraggable {
    * @returns {HTMLElement[]}
    */
   static GetDraggedObjs() {
-    return MyDraggable._dragArr;
+    return this._dragArr;
   }
 
   /**

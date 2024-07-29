@@ -1,10 +1,9 @@
 import MyEnum from "../myJS/MyEnum.js";
 import * as Parts from "./parts.js";
 import * as Components from "./composition.js";
-import MyDraggable from "../myJS/MyDraggable.js";
 import MyHTML from "../myJS/MyHTML.js";
-import MyTemplate from "../myJS/MyTemplate.js";
-import MyMath from "../myJS/MyMath.js";
+import MyArr from "../myJS/MyArr.js";
+import GrabSystem from "./GrabSystem.js";
 
 /**
  * @typedef {object} GameSpaceConfig gameconfig object
@@ -12,6 +11,122 @@ import MyMath from "../myJS/MyMath.js";
  * @property {number} Width width of the game in pixels
  * @property {number} Height height of the game in pixels
  */
+
+export class GameSpace {
+  /**
+   *
+   * @param {GameSpaceConfig} conf
+   */
+  constructor(game, targetHTML, conf) {
+    this.Game = game;
+
+    this.HtmlElement = document.createElement("div");
+    this.HtmlElement.id = "GameSpace";
+    targetHTML.appendChild(this.HtmlElement);
+    this.Width = conf.Width;
+    this.Height = conf.Height;
+    this.Scale = conf.Scale;
+
+    Game;
+  }
+
+  /**
+   * refrence for game instance.
+   * @type {Game}
+   */
+  Game;
+  /**
+   * @type {HTMLDivElement}
+   */
+  HtmlElement;
+
+  /**
+   * Z index Default
+   */
+  ZIndDef = 0;
+
+  /**
+   * Is the current highest used z index + 1.
+   * So a safe to use z index.
+   */
+  ZIndFloor = this.ZIndDef;
+
+  /**
+   * game scale
+   */
+  get Scale() {
+    return MyHTML.getPropertyFlt(document.body, "--scale");
+  }
+  /**
+   * game scale
+   */
+  set Scale(value) {
+    document.body.style.setProperty("--scale", value + "");
+  }
+
+  /**
+   * width
+   */
+  get Width() {
+    return parseFloat(this.HtmlElement.style.width);
+  }
+  /**
+   * width
+   */
+  set Width(value) {
+    this.HtmlElement.style.width = value + "px";
+    this.Game.Width = value;
+  }
+  /**
+   * Height
+   */
+  get Height() {
+    return parseFloat(this.HtmlElement.style.height);
+  }
+  /**
+   * Height
+   */
+  set Height(value) {
+    this.HtmlElement.style.height = value + "px";
+    this.Game.Height = value;
+  }
+
+  /**
+   * general game object HTML add
+   * @param {HTMLElement} element
+   * @param {number} x x coordinate in gamespace.
+   * @param {number} y y coordinate in gamespace.
+   */
+  AddElement(element, x, y) {
+    this.HtmlElement.appendChild(element);
+    element.style.left = x + "px";
+    element.style.top = y + "px";
+  }
+
+  /**
+   * general game object HTML remove
+   * @param {HTMLElement} element
+   */
+  RemoveElement(element) {
+    this.HtmlElement.removeChild(element);
+  }
+
+  //#region z index
+
+  /**
+   * cleans up the z indexes.
+   */
+  zindexClean() {
+    /*
+    copy gun list
+    sort by index increasing
+
+    */
+  }
+
+  //#endregion
+}
+
 /**
  * @typedef {object} GameUIConfig gameconfig object
  */
@@ -32,7 +147,7 @@ export class Game {
    */
   GameWindow;
   /**
-   * @type {HTMLDivElement}
+   * @type {GameSpace}
    */
   GameSpace;
   /**
@@ -52,6 +167,11 @@ export class Game {
   FPS;
 
   /**
+   * @type {Parts.gunPart[]}
+   */
+  GameObjList = [];
+
+  /**
    * game scale
    */
   get Scale() {
@@ -65,6 +185,31 @@ export class Game {
   }
 
   /**
+   * width
+   */
+  get Width() {
+    return parseFloat(this.GameWindow.style.width);
+  }
+  /**
+   * width
+   */
+  set Width(value) {
+    this.GameWindow.style.width = value + "px";
+  }
+  /**
+   * Height
+   */
+  get Height() {
+    return parseFloat(this.GameWindow.style.height);
+  }
+  /**
+   * Height
+   */
+  set Height(value) {
+    this.GameWindow.style.height = value + "px";
+  }
+
+  /**
    *
    * @param {GameConfig} conf
    */
@@ -74,10 +219,11 @@ export class Game {
     this.FPS = conf.FPS;
     //setup
 
+    conf.GameSpace;
+
     //GameSpace
-    this.GameSpace = document.createElement("div");
-    this.GameSpace.id = "GameSpace";
-    this.GameWindow.appendChild(this.GameSpace);
+    conf.GameSpace.TargetHTML = this.GameWindow;
+    this.GameSpace = new GameSpace(this, this.GameWindow, conf.GameSpace);
 
     //GameUI
     this.GameUI = document.createElement("div");
@@ -103,45 +249,38 @@ export class Game {
    * the main game loop.
    */
   MainLoop() {
-    let TestObjs = this.GameSpace.children;
-
-    let DraggedObj = GrabSystem.GetDraggedObjs();
-    let spd = 1;
-
-    let GameRect = this.GameSpace.getBoundingClientRect();
-    let target = {
-      x: GameRect.width / 2,
-      y: GameRect.height / 2,
-    };
-
-    let rect, newPoint;
-    /**
-     * @type {HTMLElement}
-     */
-    let element;
-    for (let i = 0; i < TestObjs.length; i++) {
-      element = TestObjs[i];
-
-      if (DraggedObj.indexOf(element) != -1) continue;
-
-      rect = {
-        // offsetLeft & offsetTop is an int leads to movement problems.
-        x: MyHTML.getPropertyFlt(element, "left"),
-        y: MyHTML.getPropertyFlt(element, "top"),
-      };
-
-      if (!(rect.x == target.x && rect.y == target.y)) {
-        let ang = MyMath.pointAngle(rect.x, rect.y, target.x, target.y);
-        newPoint = MyMath.findNewPoint(rect.x, rect.y, ang, spd);
-
-        GrabSystem.MoveElTo(
-          element,
-          MyMath.ovsh(rect.x, newPoint.x, target.x),
-          MyMath.ovsh(rect.y, newPoint.y, target.y),
-          GameRect
-        );
-      }
-    }
+    // let TestObjs = this.GameSpace.children;
+    // let DraggedObj = GrabSystem.GetDraggedObjs();
+    // let spd = 1;
+    // let GameRect = this.GameSpace.getBoundingClientRect();
+    // let target = {
+    //   x: GameRect.width / 2,
+    //   y: GameRect.height / 2,
+    // };
+    // let rect, newPoint;
+    // /**
+    //  * @type {HTMLElement}
+    //  */
+    // let element;
+    // for (let i = 0; i < TestObjs.length; i++) {
+    //   element = TestObjs[i];
+    //   if (DraggedObj.indexOf(element) != -1) continue;
+    //   rect = {
+    //     // offsetLeft & offsetTop is an int leads to movement problems.
+    //     x: MyHTML.getPropertyFlt(element, "left"),
+    //     y: MyHTML.getPropertyFlt(element, "top"),
+    //   };
+    //   if (!(rect.x == target.x && rect.y == target.y)) {
+    //     let ang = MyMath.pointAngle(rect.x, rect.y, target.x, target.y);
+    //     newPoint = MyMath.findNewPoint(rect.x, rect.y, ang, spd);
+    //     GrabSystem.MoveElTo(
+    //       element,
+    //       MyMath.ovsh(rect.x, newPoint.x, target.x),
+    //       MyMath.ovsh(rect.y, newPoint.y, target.y),
+    //       GameRect
+    //     );
+    //   }
+    // }
   }
 
   /**
@@ -153,44 +292,89 @@ export class Game {
 
   //#region Gameobj
 
+  //adding/removing game objs
   /**
-   * general game object add
+   * general game object HTML add
+   * @param {Parts.htmlObj} obj
+   * @param {number} x x coordinate in gamespace.
+   * @param {number} y y coordinate in gamespace.
+   */
+  _addGameObjHTML(obj, x, y) {
+    this.GameSpace.AddElement(obj.htmlElement, x, y);
+  }
+
+  /**
+   * general game object HTML add
+   * @param {Parts.htmlObj} obj
+   */
+  _removeGameObjHTML(obj) {
+    this.GameSpace.AddElement(obj.htmlElement, x, y);
+  }
+
+  /**
+   * general game object JS add
+   * @param {object} obj
+   * @param {number} x x coordinate in gamespace.
+   * @param {number} y y coordinate in gamespace.
+   */
+  _addGameObjJS(obj, x, y) {}
+
+  /**
+   *
    * @param {object} obj
    */
-  _addGameObj(obj) {}
+  _removeGameObjJS(obj) {}
 
   /**
    * adds gunpart to gamespace
    * @param {Parts.gunPart} gunPart
+   * @param {number} x x coordinate in gamespace.
+   * @param {number} y y coordinate in gamespace.
    */
-  addGunPart(gunPart) {
+  addGunPart(gunPart, x, y) {
     //general
-    this._addGameObj(gunPart);
-
     //js
-
+    this._addGameObjJS(gunPart);
     //html
+    this._addGameObjHTML(gunPart, x, y);
 
-    this.GameSpace.appendChild(gunPart.htmlElement);
+    //gun specific
+    this.GameObjList.push(gunPart);
   }
+
+  /**
+   *
+   * @param {Parts.gunPart} gunPart
+   */
+  removeGunPart(gunPart) {
+    //general
+    //js
+    this._removeGameObjJS(gunPart);
+    //html
+    this._removeGameObjHTML(gunPart, x, y);
+
+    //gun specific
+    MyArr.removeEntry(this.GameObjList, gunPart);
+  }
+
+  // attach detach
 
   /**
    * detaches game obj and adds it to gamespace.
    * @param {Parts.gunPart & Components.CompAttachable} target
    */
   detatch(target) {
-    if (target.Detach()) {
-      this.GameSpace.appendChild(target.htmlElement);
-    }
+    let parent = target.htmlElement.parentElement;
+    this.GameSpace.HtmlElement.appendChild(target.htmlElement);
+    GrabSystem.MoveElTo(
+      target.htmlElement,
+      Number.parseFloat(parent.style.left) +
+        Number.parseFloat(target.htmlElement.style.left),
+      Number.parseFloat(parent.style.top) +
+        Number.parseFloat(target.htmlElement.style.top)
+    );
+    target.zIndex = 0;
   }
-
-  //#endregion
-  //#region z index
-
-  /**
-   * cleans up the z indexes.
-   */
-  zindexClean() {}
 
   //#endregion
 
@@ -226,7 +410,7 @@ export class GunFactory {
    * Components.CompDisplayable} GunBase base gun frame
    */
   /**
-   *
+   * base gun part with display.
    * @param {Parts.PartConf} partConf
    * @param {Components.CompDisplayableConf} dispConf
    * @returns {GunBase}
@@ -237,6 +421,23 @@ export class GunFactory {
 
     let obj = new Parts.gunPart(partConf, base);
     return Object.assign(obj, Components.Comp_Displayable(obj, dispConf));
+  }
+
+  /**
+   * @typedef {Parts.gunPart &
+   * Components.CompDisplayable &
+   * Components.CompAttachable} Attachable generic attachable
+   */
+  /**
+   * Generic attachable
+   * @param {Parts.PartConf} partConf
+   * @param {Components.CompDisplayableConf} dispConf
+   * @param {Components.CompAttachableConf} attachConf
+   * @returns {Attachable}
+   */
+  static Make_Attachable(partConf, dispConf, attachConf) {
+    let obj = GunFactory.Make_Base(partConf, dispConf);
+    return Object.assign(obj, Components.Comp_Attachable(obj, attachConf));
   }
 
   /**
@@ -258,17 +459,17 @@ export class GunFactory {
 
   /**
    * @typedef {FrameGeneral &
-   * Components.CompGrabbable} FramePistol base pistol frame
+   * Components.CompGrabbable} FrameGrip base gun frame with grip.
    */
   /**
-   * Base pistol frame, with grip!
+   * Base gun frame, with grip!
    * @param {Parts.PartConf} partConf
    * @param {Components.CompDisplayableConf} dispConf
    * @param {Components.CompAttHostConf} attHostConf
    * @param {Components.CompGrabConf} grabConf
-   * @returns {FramePistol}
+   * @returns {FrameGrip}
    */
-  static Make_FramePistol(partConf, dispConf, attHostConf, grabConf) {
+  static Make_FrameGrip(partConf, dispConf, attHostConf, grabConf) {
     let obj = GunFactory.Make_FrameGeneral(partConf, dispConf, attHostConf);
     return Object.assign(obj, Components.Comp_Grabbable(obj, grabConf));
   }
@@ -299,20 +500,57 @@ export class GunFactory {
   }
 
   /**
-   * @typedef {Parts.gunPart & Components.CompAttachable &
-   * Components.CompBulletHolder} Extractor base pistol frame
+   * @typedef {GunBase & Components.CompAttachable &
+   * Components.CompBulletHolder} Extractor Extractor that grabs bullets!
    */
   /**
    * Extractor that grabs bullets!
    * @param {Parts.PartConf} partConf
+   * @param {Components.CompDisplayableConf} dispConf
    * @param {Components.CompAttachableConf} attachConf
    * @param {Components.CompBulletHoldConf} bHoldConf
    * @returns {Extractor}
    */
-  static Make_Extractor(partConf, attachConf, bHoldConf) {
-    let obj = new Parts.gunPart(partConf);
+  static Make_Extractor(partConf, dispConf, attachConf, bHoldConf) {
+    let obj = this.Make_Base(partConf, dispConf);
     return Object.assign(
       obj,
+      Components.Comp_Attachable(obj, attachConf),
+      Components.Comp_BulletHolder(obj, bHoldConf)
+    );
+  }
+
+  /**
+   * @typedef {GunBase &
+   * Components.CompAttachHost &
+   * Components.CompGrabbable &
+   * Components.CompAttachable &
+   * Components.CompBulletHolder
+   * } PistolSlide Pistol slide
+   */
+  /**
+   * Pistol slide
+   * @param {Parts.PartConf} partConf
+   * @param {Components.CompDisplayableConf} dispConf
+   * @param {Components.CompAttHostConf} attHostConf
+   * @param {Components.CompGrabConf} grabConf
+   * @param {Components.CompAttachableConf} attachConf
+   * @param {Components.CompBulletHoldConf} bHoldConf
+   * @returns {PistolSlide}
+   */
+  static Make_PistolSlide(
+    partConf,
+    dispConf,
+    attHostConf,
+    grabConf,
+    attachConf,
+    bHoldConf
+  ) {
+    let obj = this.Make_Base(partConf, dispConf);
+    return Object.assign(
+      obj,
+      Components.Comp_AttachHost(obj, attHostConf),
+      Components.Comp_Grabbable(obj, grabConf),
       Components.Comp_Attachable(obj, attachConf),
       Components.Comp_BulletHolder(obj, bHoldConf)
     );
@@ -378,5 +616,3 @@ export class GunFactory {
 
   //#endregion
 }
-
-export class GrabSystem extends MyDraggable {}
