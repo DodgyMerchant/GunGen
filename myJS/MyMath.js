@@ -143,4 +143,45 @@ export default class MyMath {
       target
     );
   }
+
+  /**
+   *
+   * @param {{top: number, bottom: number, left: number, right: number}} rec1
+   * @param {{top: number, bottom: number, left: number, right: number}} rec2
+   * @returns
+   */
+  static recCollide(rec1, rec2) {
+    return !(
+      rec1.top > rec2.bottom ||
+      rec1.right < rec2.left ||
+      rec1.bottom < rec2.top ||
+      rec1.left > rec2.right
+    );
+  }
+
+  /**
+   *
+   * @param {{top: number, bottom: number, left: number, right: number}} rec1
+   * @param {{top: number, bottom: number, left: number, right: number}} rec2
+   * @returns
+   */
+  static recInside(rec1, rec2) {
+    return (
+      rec2.top <= rec1.top &&
+      rec1.top <= rec2.bottom &&
+      rec2.top <= rec1.bottom &&
+      rec1.bottom <= rec2.bottom &&
+      rec2.left <= rec1.left &&
+      rec1.left <= rec2.right &&
+      rec2.left <= rec1.right &&
+      rec1.right <= rec2.right
+    );
+
+    return (
+      rec1.top <= rec2.bottom &&
+      rec1.bottom >= rec2.top &&
+      rec1.left <= rec2.right &&
+      rec1.right >= rec2.left
+    );
+  }
 }

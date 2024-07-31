@@ -83,15 +83,16 @@ export default class InteractionSystem {
    * make one element Interactable.
    * @param {((this: GlobalEventHandlers, ev: MouseEvent) => any)} pressFunction
    * @param {HTMLElement} moveTarget the element that will be dragged.
-   * @param {HTMLElement} [interactionTarget] the elent clicked on to enter dragging state.
+   * @param {HTMLElement[]} interactionTargets the elent clicked on to enter dragging state.
    */
-  static MakeElementInteractable(pressFunction, moveTarget, interactionTarget) {
-    if (!interactionTarget) {
-      // if present, the header is where you move the DIV from:
-      interactionTarget = moveTarget;
-    }
-
-    interactionTarget.addEventListener("mousedown", pressFunction);
+  static MakeElementInteractable(
+    pressFunction,
+    moveTarget,
+    interactionTargets
+  ) {
+    interactionTargets.forEach((element) => {
+      element.addEventListener("mousedown", pressFunction);
+    });
     // document.onmouseup = closeDragElement.bind(document, [this]);
     // document.onmousemove = elementDrag.bind(document, [this]);
 

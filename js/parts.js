@@ -46,6 +46,7 @@ export class Round {
  * @prop {boolean} [detachable] if child is detachable by direct action (f.e. player richt mouse click).
  * @prop {number} attachX attach point x axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
  * @prop {number} attachY attach point y axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
+ * @prop {Components.BoxDimensions} [connectDimensions] Dimensions for the connection hit box.
  */
 /**
  * a slot to connect one part to another.
@@ -131,6 +132,7 @@ export class partSlot {
   _attach(part) {
     if (!this.child || this.child == part) {
       this.child = part;
+      
       return true;
     }
     return false;

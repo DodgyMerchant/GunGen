@@ -8,6 +8,22 @@ const GrabSourceClass = "GunGen-grabSource";
 const AttachableClass = "GunGen-attachable";
 
 /**
+ * @typedef {object} BoxDimensions
+ * @property {number} x top left x coordinate
+ * @property {number} y top left y coordinate
+ * @property {number} w width
+ * @property {number} h height
+ */
+/**
+ * @typedef {object} RBoxDimensions
+ * @property {number} cx center x coordinate
+ * @property {number} cy center y coordinate
+ * @property {number} w width
+ * @property {number} h height
+ * @property {number} [rot] rotation in degree around the center of the box.
+ */
+
+/**
  * @typedef {object} CompDisplayableConf display config objj
  * @property {string} imgSrc
  */
@@ -283,17 +299,19 @@ export const Comp_BulletHolder = (base, conf) => {
 
 /**
  * @typedef {object} CompGrabConf grabbable config obj.
- * @property {{x:number, y:number, w:number, h:number}} [handleDimensions] grabbable area dimenesions. leave empty for entire part.
+ * @property {(RBoxDimensions | BoxDimensions)[]} [handleDimensions] grabbable area dimenesions. leave empty for entire part.
  * @property {gunPart} [grabTarget] target of movement. leave undefind to make this components gunpart grabbale.
  * @property {HTMLElement} [restrictions] restrict movement to element dimensions.
  * @property {boolean} [grabHosted] grabbable if connected to a host. default true
  */
 /**
  * @typedef {{
- * htmlGrabElement: HTMLElement;
+ * htmlGrabElement: HTMLElement[];
  * grabHosted: boolean;
  * grabCheck(): boolean;
- *}} CompGrabbable
+ * setGrabDimenBox(element: HTMLDivElement, dimensions: BoxDimensions): void;
+ * setGrabDimenRot(element: HTMLDivElement, dimensions: RBoxDimensions): void;
+ * }} CompGrabbable
  */
 /**
  * part that is grabbable by the mouse in some way.
@@ -306,9 +324,9 @@ export const Comp_BulletHolder = (base, conf) => {
 export const Comp_Grabbable = (base, conf) => {
   let obj = {
     /**
-     * @type {HTMLElement}
+     * @type {HTMLElement[]}
      */
-    htmlGrabElement: undefined,
+    htmlGrabElement: [],
 
     /**
      * grabbable if connected to a host.
@@ -320,6 +338,33 @@ export const Comp_Grabbable = (base, conf) => {
      */
     grabCheck() {
       return InteractionSystem.GetDraggedObjs().indexOf(this.htmlElement) != -1;
+    },
+
+    /**
+     * gives the given grab element the given dimensions.
+     * @param {HTMLDivElement} element
+     * @param {BoxDimensions} dimensions
+     */
+    setGrabDimenBox(element, dimensions) {
+      element.style.left = dimensions.x * base.game.Scale + "px";
+      element.style.top = dimensions.y * base.game.Scale + "px";
+      element.style.width = dimensions.w * base.game.Scale + "px";
+      element.style.height = dimensions.h * base.game.Scale + "px";
+    },
+
+    /**
+     * gives the given grab element the given dimensions.
+     * @param {HTMLDivElement} element
+     * @param {RBoxDimensions} dimensions
+     */
+    setGrabDimenRot(element, dimensions) {
+      element.style.left =
+        (dimensions.cx - dimensions.w * 0.5) * base.game.Scale + "px";
+      element.style.top =
+        (dimensions.cy - dimensions.h * 0.5) * base.game.Scale + "px";
+      element.style.width = dimensions.w * base.game.Scale + "px";
+      element.style.height = dimensions.h * base.game.Scale + "px";
+      if (dimensions.rot) element.style.rotate = dimensions.rot + "deg";
     },
   };
 
@@ -335,24 +380,25 @@ export const Comp_Grabbable = (base, conf) => {
   if (typeof conf.grabHost !== "undefined") obj.grabHost = conf.grabHost;
 
   // ----- create handle -----
-  let grab;
 
   //create handle if handle dimensions are specified. If not the base elelemnt will be the handle.
-  if (conf.handleDimensions) {
+  if (conf.handleDimensions !== undefined) {
     // create handle
-    grab = document.createElement("div");
-    base.htmlElement.appendChild(grab);
 
-    grab.style.left = conf.handleDimensions.x * base.game.Scale + "px";
-    grab.style.top = conf.handleDimensions.y * base.game.Scale + "px";
-    grab.style.width = conf.handleDimensions.w * base.game.Scale + "px";
-    grab.style.height = conf.handleDimensions.h * base.game.Scale + "px";
+    let el;
+    conf.handleDimensions.forEach((dimensions) => {
+      el = document.createElement("div");
+      base.htmlElement.appendChild(el);
+      if (dimensions.cx) obj.setGrabDimenRot(el, dimensions);
+      else obj.setGrabDimenBox(el, dimensions);
+      el.classList.add(GrabSourceClass);
+
+      obj.htmlGrabElement.push(el);
+    });
   } else {
-    grab = base.htmlElement;
+    obj.htmlGrabElement.push(base.htmlElement);
+    base.htmlElement.classList.add(GrabSourceClass);
   }
-
-  grab.classList.add(GrabSourceClass);
-  obj.htmlGrabElement = grab;
 
   var pos1 = 0,
     pos2 = 0,
@@ -364,6 +410,12 @@ export const Comp_Grabbable = (base, conf) => {
     conf.restrictions !== undefined
       ? conf.restrictions
       : base.game.GameSpace.HtmlElement;
+
+  InteractionSystem.MakeElementInteractable(
+    dragMouseDown,
+    moveTarget,
+    obj.htmlGrabElement
+  );
 
   /**
    *
@@ -439,8 +491,6 @@ export const Comp_Grabbable = (base, conf) => {
     InteractionSystem._removeDraggable(base);
     button = undefined;
   }
-
-  InteractionSystem.MakeElementInteractable(dragMouseDown, moveTarget, grab);
 
   return obj;
 };

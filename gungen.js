@@ -2,6 +2,7 @@ import { CALIBER, SLOTTYPE } from "./js/enums.js";
 import { partSlot } from "./js/parts.js";
 import * as System from "./js/system.js";
 import MyHTML from "./myJS/MyHTML.js";
+import MyMath from "./myJS/MyMath.js";
 import MyTemplate from "./myJS/MyTemplate.js";
 
 if (!MyTemplate.supports()) {
@@ -10,6 +11,7 @@ if (!MyTemplate.supports()) {
   );
   stop();
 }
+
 const Game = new System.Game({
   GameWindow: document.getElementById("GameWindow"),
   FPS: 1000 / 60,
@@ -40,7 +42,6 @@ if left empty no target will be given and functionality ignored/not setup.
 TODO: give attachable component own intput box like grabbable. Split functionality.
 TODO: combin the gab and attach component like you do with components already.
 TODO: change the GRAB system to an interact system.
-TODO: MakeElementInteractable param the functions used for mouse press. everything from there happens in that function anyways.
 */
 
 let myFrame = System.GunFactory.Make_FrameGrip(
@@ -68,7 +69,17 @@ let myFrame = System.GunFactory.Make_FrameGrip(
           {
             imgSrc: "assets/Gmag_17.png",
           },
-          {},
+          {
+            handleDimensions: [
+              {
+                cx: 9.5, // 21
+                cy: 15, // 31
+                w: 10,
+                h: 32,
+                rot: -22,
+              },
+            ],
+          },
           { caliber: CALIBER.CAL9 },
           {
             attachType: SLOTTYPE.PistolMag,
@@ -79,8 +90,8 @@ let myFrame = System.GunFactory.Make_FrameGrip(
       }),
       //slide
       new partSlot({
-        attachX: 0,
-        attachY: 0,
+        attachX: 56,
+        attachY: -1,
         zIndex: 1,
         child: System.GunFactory.Make_PistolSlide(
           {
@@ -93,17 +104,19 @@ let myFrame = System.GunFactory.Make_FrameGrip(
           },
           {
             grabHosted: true,
-            handleDimensions: {
-              x: 38,
-              y: 1,
-              w: 19,
-              h: 7,
-            },
+            handleDimensions: [
+              {
+                x: 38,
+                y: 1,
+                w: 19,
+                h: 7,
+              },
+            ],
           },
           {
             attachType: SLOTTYPE.PistolBarrel,
-            attachX: 0,
-            attachY: 8,
+            attachX: 56,
+            attachY: 7,
           },
           { caliber: CALIBER.CAL9, source: undefined }
         ),
@@ -130,13 +143,39 @@ let myFrame = System.GunFactory.Make_FrameGrip(
     ],
   },
   {
-    handleDimensions: {
-      x: 37,
-      y: 3,
-      w: 23,
-      h: 26,
-    },
+    handleDimensions: [
+      {
+        cx: 47.5, //48/49
+        cy: 16.5, // 16
+        w: 15,
+        h: 26,
+        rot: -22,
+      },
+    ],
   }
+);
+
+// Game.addGunPart(
+
+//   20,
+//   20
+// );
+
+console.log(
+  MyMath.recCollide(
+    {
+      top: 10,
+      bottom: 20,
+      left: 10,
+      right: 20,
+    },
+    {
+      top: 12,
+      bottom: 18,
+      left: 12,
+      right: 18,
+    }
+  )
 );
 
 myFrame.imgLoadPromise.finally(() => {

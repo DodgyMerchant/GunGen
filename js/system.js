@@ -172,6 +172,12 @@ export class Game {
   GameObjList = [];
 
   /**
+   * list of empty slots.
+   * @type {Parts.partSlot[]}
+   */
+  OpenSlots = [];
+
+  /**
    * game scale
    */
   get Scale() {
@@ -331,7 +337,7 @@ export class Game {
    * @param {number} x x coordinate in gamespace.
    * @param {number} y y coordinate in gamespace.
    */
-  addGunPart(gunPart, x, y) {
+  addGunPart(gunPart, x = 0, y = 0) {
     //general
     //js
     this._addGameObjJS(gunPart);
@@ -357,7 +363,8 @@ export class Game {
     MyArr.removeEntry(this.GameObjList, gunPart);
   }
 
-  // attach detach
+  //#endregion
+  //#region attach detach
 
   /**
    * detaches game obj and adds it to gamespace.
@@ -374,6 +381,30 @@ export class Game {
         Number.parseFloat(target.htmlElement.style.top)
     );
     target.zIndex = 0;
+  }
+
+  /**
+   *
+   * @param {Parts.partSlot} slot
+   */
+  addOpen(slot) {
+    this.OpenSlots.push(slot);
+  }
+
+  /**
+   *
+   * @param {Parts.partSlot} slot
+   */
+  removeOpen(slot) {
+    MyArr.removeEntry(this.OpenSlots, slot);
+  }
+
+  /**
+   * 
+   * @param {Parts.gunPart & Components.CompAttachable} gunPart 
+   */
+  checkOpen(gunPart) {
+    gunPart;
   }
 
   //#endregion
