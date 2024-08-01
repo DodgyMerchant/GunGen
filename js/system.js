@@ -534,26 +534,24 @@ export class GunFactory {
 
   /**
    * @typedef {GunBase &
-   * Components.CompGrabbable &
-   * Components.CompBulletContainer &
-   * Components.CompAttachable} Magazine Magazine for a gun
+   * Components.CompAttachable &
+   * Components.CompBulletContainer
+   * } Magazine Magazine for a gun
    */
   /**
    * magazine, bullet container
    * @param {Parts.PartConf} partConf
    * @param {Components.CompDisplayableConf} dispConf
-   * @param {Components.CompGrabConf} grabConf
-   * @param {Components.CompBulContConf} containConf
    * @param {Components.CompAttachableConf} attachConf
+   * @param {Components.CompBulContConf} containConf
    * @returns {Magazine}
    */
-  static Make_Magazine(partConf, dispConf, grabConf, containConf, attachConf) {
+  static Make_Magazine(partConf, dispConf, attachConf, containConf) {
     let obj = GunFactory.Make_Base(partConf, dispConf);
     return Object.assign(
       obj,
-      Components.Comp_Grabbable(obj, grabConf),
-      Components.Comp_BulletContainer(obj, containConf),
-      Components.Comp_Attachable(obj, attachConf)
+      Components.Comp_Attachable(obj, attachConf),
+      Components.Comp_BulletContainer(obj, containConf)
     );
   }
 
@@ -580,7 +578,6 @@ export class GunFactory {
 
   /**
    * @typedef {GunBase &
-   * Components.CompGrabbable &
    * Components.CompAttachable &
    * Components.CompBulletHolder
    * } PistolSlideBasic Pistol slide
@@ -589,22 +586,14 @@ export class GunFactory {
    * Pistol slide
    * @param {Parts.PartConf} partConf
    * @param {Components.CompDisplayableConf} dispConf
-   * @param {Components.CompGrabConf} grabConf
    * @param {Components.CompAttachableConf} attachConf
    * @param {Components.CompBulletHoldConf} bHoldConf
    * @returns {PistolSlideBasic}
    */
-  static Make_PistolSlideBasic(
-    partConf,
-    dispConf,
-    grabConf,
-    attachConf,
-    bHoldConf
-  ) {
+  static Make_PistolSlideBasic(partConf, dispConf, attachConf, bHoldConf) {
     let obj = this.Make_Base(partConf, dispConf);
     return Object.assign(
       obj,
-      Components.Comp_Grabbable(obj, grabConf),
       Components.Comp_Attachable(obj, attachConf),
       Components.Comp_BulletHolder(obj, bHoldConf)
     );
@@ -619,7 +608,6 @@ export class GunFactory {
    * Pistol slide
    * @param {Parts.PartConf} partConf
    * @param {Components.CompDisplayableConf} dispConf
-   * @param {Components.CompGrabConf} grabConf
    * @param {Components.CompAttachableConf} attachConf
    * @param {Components.CompBulletHoldConf} bHoldConf
    * @param {Components.CompAttHostConf} attHostConf
@@ -628,7 +616,6 @@ export class GunFactory {
   static Make_PistolSlide(
     partConf,
     dispConf,
-    grabConf,
     attachConf,
     bHoldConf,
     attHostConf
@@ -636,7 +623,6 @@ export class GunFactory {
     let obj = this.Make_PistolSlideBasic(
       partConf,
       dispConf,
-      grabConf,
       attachConf,
       bHoldConf
     );

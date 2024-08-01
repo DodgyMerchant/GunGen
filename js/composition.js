@@ -95,6 +95,7 @@ export const Comp_Displayable = (base, conf) => {
  * @prop {Round[] | RoundConfig[] | RoundConfig | undefined} contents array of contents bullets
  */
 /**
+ * bullet container.
  * @typedef { {
  * caliber: CALIBER;
  * capacity: number;
@@ -423,7 +424,7 @@ export const Comp_Grabbable = (base, conf) => {
   function dragMouseDown(ev) {
     ev = ev || window.event;
     // ev.preventDefault();
-
+    console.log("here 1");
     switch (ev.button) {
       case 2: // right mb
         if (base.parent?.detachable !== true) {
@@ -518,7 +519,7 @@ export const Comp_Grabbable = (base, conf) => {
 };
 
 /**
- * @typedef {object} CompAttachableConf config obj for attachable parts
+ * @typedef {object} _CATTC internal
  * @prop {PartSlot} [parent] parent this gun part is attached to
  * @prop {SLOTTYPE} attachType compatable attachment types
  * @prop {number} attachX attach point x axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
@@ -527,25 +528,28 @@ export const Comp_Grabbable = (base, conf) => {
  * @prop {boolean} [grabHosted] grabbable if connected to a host. default true
  */
 /**
- * @typedef {{
+ * @typedef {CompGrabConf & _CATTC} CompAttachableConf config obj for attachable parts. extends Component grabbable config.
+ */
+/**
+ * @typedef { CompGrabbable & {
  * parent: PartSlot;
  * attachType: SLOTTYPE;
  * attachX: number;
  * attachY: number;
  * connectRec: BoxDimensions;
  * CheckAttached(): boolean;
- * Attach(target: PartSlot): boolean;
+ * Attach(target: PartSlot | undefined): boolean;
  * Detach(): boolean;
- * }} CompAttachable
+ * }} CompAttachable extends Component grabbable.
  */
 /**
- *
+ * extends Component grabbable.
  * @param {GunPart} base target obj
  * @param {CompAttachableConf} conf
  * @returns {CompAttachable} component for making a part attachable to another.
  */
 export const Comp_Attachable = (base, conf) => {
-  let obj = {
+  let obj = Object.assign(Comp_Grabbable(base, conf), {
     /**
      * parent this gun part is attached to
      * @type {PartSlot}
@@ -639,7 +643,7 @@ export const Comp_Attachable = (base, conf) => {
       }
       return false;
     },
-  };
+  });
 
   base.htmlElement.classList.add(AttachableClass);
 
@@ -653,6 +657,7 @@ export const Comp_Attachable = (base, conf) => {
   debug.style.top = obj.connectRec.y + "px";
   debug.style.width = obj.connectRec.w + "px";
   debug.style.height = obj.connectRec.h + "px";
+  //debug end
 
   if (conf.parent) {
     obj.Attach(conf.parent);
