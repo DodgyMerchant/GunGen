@@ -4,6 +4,7 @@ import * as Components from "./composition.js";
 import MyHTML from "../myJS/MyHTML.js";
 import MyArr from "../myJS/MyArr.js";
 import InteractionSystem from "./InteractionSystem.js";
+import MyMath from "../myJS/MyMath.js";
 
 /**
  * @typedef {object} GameSpaceConfig gameconfig object
@@ -167,13 +168,13 @@ export class Game {
   FPS;
 
   /**
-   * @type {Parts.gunPart[]}
+   * @type {Parts.GunPart[]}
    */
   GameObjList = [];
 
   /**
    * list of empty slots.
-   * @type {Parts.partSlot[]}
+   * @type {Parts.PartSlot[]}
    */
   OpenSlots = [];
 
@@ -251,6 +252,8 @@ export class Game {
     );
   }
 
+  //#region main loop
+
   /**
    * the main game loop.
    */
@@ -296,12 +299,13 @@ export class Game {
     clearInterval(this.InterMainLoop);
   }
 
+  //#endregion
   //#region Gameobj
 
   //adding/removing game objs
   /**
    * general game object HTML add
-   * @param {Parts.htmlObj} obj
+   * @param {Parts.HtmlObj} obj
    * @param {number} x x coordinate in gamespace.
    * @param {number} y y coordinate in gamespace.
    */
@@ -311,7 +315,7 @@ export class Game {
 
   /**
    * general game object HTML add
-   * @param {Parts.htmlObj} obj
+   * @param {Parts.HtmlObj} obj
    */
   _removeGameObjHTML(obj) {
     this.GameSpace.AddElement(obj.htmlElement, x, y);
@@ -333,34 +337,34 @@ export class Game {
 
   /**
    * adds gunpart to gamespace
-   * @param {Parts.gunPart} gunPart
+   * @param {Parts.GunPart} GunPart
    * @param {number} x x coordinate in gamespace.
    * @param {number} y y coordinate in gamespace.
    */
-  addGunPart(gunPart, x = 0, y = 0) {
+  addGunPart(GunPart, x = 0, y = 0) {
     //general
     //js
-    this._addGameObjJS(gunPart);
+    this._addGameObjJS(GunPart);
     //html
-    this._addGameObjHTML(gunPart, x, y);
+    this._addGameObjHTML(GunPart, x, y);
 
     //gun specific
-    this.GameObjList.push(gunPart);
+    this.GameObjList.push(GunPart);
   }
 
   /**
    *
-   * @param {Parts.gunPart} gunPart
+   * @param {Parts.GunPart} GunPart
    */
-  removeGunPart(gunPart) {
+  removeGunPart(GunPart) {
     //general
     //js
-    this._removeGameObjJS(gunPart);
+    this._removeGameObjJS(GunPart);
     //html
-    this._removeGameObjHTML(gunPart, x, y);
+    this._removeGameObjHTML(GunPart, x, y);
 
     //gun specific
-    MyArr.removeEntry(this.GameObjList, gunPart);
+    MyArr.removeEntry(this.GameObjList, GunPart);
   }
 
   //#endregion
@@ -368,7 +372,7 @@ export class Game {
 
   /**
    * detaches game obj and adds it to gamespace.
-   * @param {Parts.gunPart & Components.CompAttachable} target
+   * @param {Parts.GunPart & Components.CompAttachable} target
    */
   detatch(target) {
     let parent = target.htmlElement.parentElement;
@@ -385,7 +389,7 @@ export class Game {
 
   /**
    *
-   * @param {Parts.partSlot} slot
+   * @param {Parts.PartSlot} slot
    */
   addOpen(slot) {
     this.OpenSlots.push(slot);
@@ -393,18 +397,41 @@ export class Game {
 
   /**
    *
-   * @param {Parts.partSlot} slot
+   * @param {Parts.PartSlot} slot
    */
   removeOpen(slot) {
     MyArr.removeEntry(this.OpenSlots, slot);
   }
 
   /**
-   * 
-   * @param {Parts.gunPart & Components.CompAttachable} gunPart 
+   * check for possible connections
+   * @param {Parts.GunPart & Components.CompAttachable} gunPart
+   * @returns {Parts.PartSlot | undefined}
    */
   checkOpen(gunPart) {
-    gunPart;
+    return this.OpenSlots.find((slot, index, obj) => {
+      if (slot.attachType === gunPart.attachType) {
+        let scale = gunPart.game.Scale;
+        let slotBoundRec = slot.parent.htmlElement.getBoundingClientRect();
+        let slotRec = {
+          top: slotBoundRec.y + slot.connectRec.y,
+          bottom: slotBoundRec.y + slot.connectRec.y + slot.connectRec.h,
+          left: slotBoundRec.x + slot.connectRec.x,
+          right: slotBoundRec.x + slot.connectRec.x + slot.connectRec.w,
+        };
+        let gunBoundRec = gunPart.htmlElement.getBoundingClientRect();
+        let gunRec = {
+          top: gunBoundRec.y + gunPart.connectRec.y,
+          bottom: gunBoundRec.y + gunPart.connectRec.y + slot.connectRec.h,
+          left: gunBoundRec.x + gunPart.connectRec.x,
+          right: gunBoundRec.x + gunPart.connectRec.x + gunPart.connectRec.w,
+        };
+        if (MyMath.recCollide(slotRec, gunRec)) {
+          return true;
+        }
+      }
+      return false;
+    });
   }
 
   //#endregion
@@ -437,7 +464,7 @@ export class GunFactory {
   //#region make
 
   /**
-   * @typedef {Parts.gunPart &
+   * @typedef {Parts.GunPart &
    * Components.CompDisplayable} GunBase base gun frame
    */
   /**
@@ -448,14 +475,14 @@ export class GunFactory {
    */
   static Make_Base(partConf, dispConf) {
     let base = document.createElement("div");
-    base.classList.add("GunGen-gunPart");
+    base.classList.add("GunGen-GunPart");
 
-    let obj = new Parts.gunPart(partConf, base);
+    let obj = new Parts.GunPart(partConf, base);
     return Object.assign(obj, Components.Comp_Displayable(obj, dispConf));
   }
 
   /**
-   * @typedef {Parts.gunPart &
+   * @typedef {Parts.GunPart &
    * Components.CompDisplayable &
    * Components.CompAttachable} Attachable generic attachable
    */
@@ -472,7 +499,7 @@ export class GunFactory {
   }
 
   /**
-   * @typedef {Parts.gunPart &
+   * @typedef {Parts.GunPart &
    * Components.CompDisplayable &
    * Components.CompAttachHost} FrameGeneral base gun frame
    */
@@ -553,26 +580,23 @@ export class GunFactory {
 
   /**
    * @typedef {GunBase &
-   * Components.CompAttachHost &
    * Components.CompGrabbable &
    * Components.CompAttachable &
    * Components.CompBulletHolder
-   * } PistolSlide Pistol slide
+   * } PistolSlideBasic Pistol slide
    */
   /**
    * Pistol slide
    * @param {Parts.PartConf} partConf
    * @param {Components.CompDisplayableConf} dispConf
-   * @param {Components.CompAttHostConf} attHostConf
    * @param {Components.CompGrabConf} grabConf
    * @param {Components.CompAttachableConf} attachConf
    * @param {Components.CompBulletHoldConf} bHoldConf
-   * @returns {PistolSlide}
+   * @returns {PistolSlideBasic}
    */
-  static Make_PistolSlide(
+  static Make_PistolSlideBasic(
     partConf,
     dispConf,
-    attHostConf,
     grabConf,
     attachConf,
     bHoldConf
@@ -580,11 +604,43 @@ export class GunFactory {
     let obj = this.Make_Base(partConf, dispConf);
     return Object.assign(
       obj,
-      Components.Comp_AttachHost(obj, attHostConf),
       Components.Comp_Grabbable(obj, grabConf),
       Components.Comp_Attachable(obj, attachConf),
       Components.Comp_BulletHolder(obj, bHoldConf)
     );
+  }
+
+  /**
+   * @typedef {PistolSlideBasic &
+   * Components.CompAttachHost
+   * } PistolSlide Pistol slide
+   */
+  /**
+   * Pistol slide
+   * @param {Parts.PartConf} partConf
+   * @param {Components.CompDisplayableConf} dispConf
+   * @param {Components.CompGrabConf} grabConf
+   * @param {Components.CompAttachableConf} attachConf
+   * @param {Components.CompBulletHoldConf} bHoldConf
+   * @param {Components.CompAttHostConf} attHostConf
+   * @returns {PistolSlide}
+   */
+  static Make_PistolSlide(
+    partConf,
+    dispConf,
+    grabConf,
+    attachConf,
+    bHoldConf,
+    attHostConf
+  ) {
+    let obj = this.Make_PistolSlideBasic(
+      partConf,
+      dispConf,
+      grabConf,
+      attachConf,
+      bHoldConf
+    );
+    return Object.assign(obj, Components.Comp_AttachHost(obj, attHostConf));
   }
 
   //#endregion make

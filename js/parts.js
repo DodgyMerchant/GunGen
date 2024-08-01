@@ -46,18 +46,40 @@ export class Round {
  * @prop {boolean} [detachable] if child is detachable by direct action (f.e. player richt mouse click).
  * @prop {number} attachX attach point x axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
  * @prop {number} attachY attach point y axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
- * @prop {Components.BoxDimensions} [connectDimensions] Dimensions for the connection hit box.
+ * @prop {Components.BoxDimensions} connectDimensions Dimensions for the connection hit box.
  */
 /**
  * a slot to connect one part to another.
  * in the whole attaching/detatching process it takes a passive role.
  */
-export class partSlot {
+export class PartSlot {
   /**
    * parent object this object os attached to
-   * @type {gunPart & Components.CompAttachHost | undefined}
+   * @type {GunPart & Components.CompAttachHost | undefined}
    */
-  parent;
+  _parent;
+  get parent() {
+    return this._parent;
+  }
+  set parent(value) {
+    this._parent = value;
+
+    if (value !== undefined) {
+      //redo the set stuff but now with a parent.
+      this.connectRec = this.connectRec;
+
+      //TODO: remove debug element.
+      let debug = document.createElement("div");
+      this._parent.htmlElement.appendChild(debug);
+
+      debug.style.backgroundColor = "rgba(0, 255, 0, 0.3)";
+      debug.style.position = "absolute";
+      debug.style.left = this.connectRec.x + "px";
+      debug.style.top = this.connectRec.y + "px";
+      debug.style.width = this.connectRec.w + "px";
+      debug.style.height = this.connectRec.h + "px";
+    }
+  }
 
   /**
    * type of attachment needed to connect
@@ -67,7 +89,7 @@ export class partSlot {
 
   /**
    * the connected part
-   * @type {gunPart & Components.CompAttachable | undefined }
+   * @type {GunPart & Components.CompAttachable | undefined }
    */
   child;
 
@@ -97,6 +119,26 @@ export class partSlot {
   detachable = true;
 
   /**
+   * connection rectangle. If two compatible PartSlot and CompAttachables connectRec overlap they can be connected.
+   * @type {Components.BoxDimensions}
+   */
+  _connectRec = undefined;
+  get connectRec() {
+    return this._connectRec;
+  }
+  set connectRec(value) {
+    if (this.parent) {
+      let scale = this.parent.game.Scale;
+      this._connectRec = {
+        x: value.x * scale,
+        y: value.y * scale,
+        w: value.w * scale,
+        h: value.h * scale,
+      };
+    } else this._connectRec = value;
+  }
+
+  /**
    * a attachment slot on another part.
    * @param {SlotConfig} config
    */
@@ -112,6 +154,9 @@ export class partSlot {
       this.attachType = config.attachType;
     }
 
+    if (this.parent) _setRec(this.parent.game.Scale, config.connectDimensions);
+    else this.connectRec = config.connectDimensions;
+
     if (config.detachable !== undefined) this.detachable = config.detachable;
 
     // adding children needed to be delayed until the base obj is ready. so it can add the html element.
@@ -126,13 +171,13 @@ export class partSlot {
   /**
    * set child variable to gunpart.
    * perform this action from child.
-   * @param {gunPart & Components.CompAttachable} part
+   * @param {GunPart & Components.CompAttachable} part
    * @returns {boolean} is successful
    */
   _attach(part) {
     if (!this.child || this.child == part) {
       this.child = part;
-      
+      this.parent.game.removeOpen(this);
       return true;
     }
     return false;
@@ -141,17 +186,18 @@ export class partSlot {
   /**
    * detach connected child.
    * perform this action from child.
-   * @param {gunPart & Components.CompAttachable} part
+   * @param {GunPart & Components.CompAttachable} part
    * @returns {boolean} is successful
    */
   _detach(part) {
     this.child = undefined;
+    this.parent.game.addOpen(this);
     return true;
   }
 
   /**
    * perform attach on child and itself.
-   * @param {gunPart & Components.CompAttachable} part part to detach
+   * @param {GunPart & Components.CompAttachable} part part to detach
    * @returns {boolean} is successful
    */
   Attach(part) {
@@ -161,7 +207,7 @@ export class partSlot {
 
   /**
    * perform detatch on child and itself.
-   * @param {gunPart & Components.CompAttachable} part part to detach
+   * @param {GunPart & Components.CompAttachable} part part to detach
    * @returns {boolean} is successful
    */
   Detach(part) {
@@ -174,7 +220,7 @@ export class partSlot {
   }
 }
 
-export class htmlObj {
+export class HtmlObj {
   /**
    * @type {HTMLElement}
    */
@@ -235,14 +281,14 @@ export class htmlObj {
 }
 
 /**
- * @typedef {object} PartConf properties for the gunPart objects config Object
+ * @typedef {object} PartConf properties for the GunPart objects config Object
  * @property {Game} game name of the gun model
  * @property {string} modelName name of the gun model
  */
 /**
  * base gun part of a gun.
  */
-export class gunPart extends htmlObj {
+export class GunPart extends HtmlObj {
   /**
    * refrence for game instance.
    */
@@ -284,7 +330,7 @@ export class gunPart extends htmlObj {
 /**
  * barrel of a gun
  */
-export class gunPart_Barrel extends gunPart {
+export class gunPart_Barrel extends GunPart {
   /**
    * caliber of the barrel
    * @type {CALIBER}
@@ -304,7 +350,7 @@ export class gunPart_Barrel extends gunPart {
   }
 }
 
-export class gunPart_Fireselector extends gunPart {
+export class gunPart_Fireselector extends GunPart {
   lockTrigger;
 
   /**
@@ -338,7 +384,7 @@ export class gunPart_Fireselector extends gunPart {
 /**
  * parent for slide and bolt
  */
-class gunPart_Top extends gunPart {
+class gunPart_Top extends GunPart {
   /**
    * if the bolt/slide will be pushed back to chamber another round.
    * only if auto loading.
@@ -372,7 +418,7 @@ class gunPart_Top extends gunPart {
   ejectPosition = 0.3;
 
   /**
-   * @param {gunPart} parent parent this gun part is attached to
+   * @param {GunPart} parent parent this gun part is attached to
    * @param {TopProp} conf config objects
    */
   constructor(parent, conf) {
@@ -408,7 +454,7 @@ class gunPart_Top extends gunPart {
 export class gunPart_Slide extends gunPart_Top {
   /**
    * pistol bolt
-   * @param {gunPart} parent parent this gun part is attached to
+   * @param {GunPart} parent parent this gun part is attached to
    * @param {SlideProp} conf config objects
    */
   constructor(parent, conf) {
@@ -438,7 +484,7 @@ export class gunPart_ChargingHandle extends gunPart_Top {
 
   /**
    * pistol bolt
-   * @param {gunPart} parent parent this gun part is attached to
+   * @param {GunPart} parent parent this gun part is attached to
    * @param {ChargeHandleProp} conf config objects
    */
   constructor(parent, conf) {

@@ -1,7 +1,7 @@
 import MyHTML from "../myJS/MyHTML.js";
 import { CALIBER, SLOTTYPE } from "./enums.js";
 import InteractionSystem from "./InteractionSystem.js";
-import { Round, gunPart, partSlot } from "./parts.js";
+import { Round, GunPart, PartSlot } from "./parts.js";
 
 const GrabTargetClass = "GunGen-grabTarget";
 const GrabSourceClass = "GunGen-grabSource";
@@ -9,23 +9,23 @@ const AttachableClass = "GunGen-attachable";
 
 /**
  * @typedef {object} BoxDimensions
- * @property {number} x top left x coordinate
- * @property {number} y top left y coordinate
- * @property {number} w width
- * @property {number} h height
+ * @prop {number} x top left x coordinate
+ * @prop {number} y top left y coordinate
+ * @prop {number} w width
+ * @prop {number} h height
  */
 /**
  * @typedef {object} RBoxDimensions
- * @property {number} cx center x coordinate
- * @property {number} cy center y coordinate
- * @property {number} w width
- * @property {number} h height
- * @property {number} [rot] rotation in degree around the center of the box.
+ * @prop {number} cx center x coordinate
+ * @prop {number} cy center y coordinate
+ * @prop {number} w width
+ * @prop {number} h height
+ * @prop {number} [rot] rotation in degree around the center of the box.
  */
 
 /**
  * @typedef {object} CompDisplayableConf display config objj
- * @property {string} imgSrc
+ * @prop {string} imgSrc
  */
 /**
  * @typedef { {
@@ -36,7 +36,7 @@ const AttachableClass = "GunGen-attachable";
  */
 /**
  * making the part displayable.
- * @param {gunPart} base target obj
+ * @param {GunPart} base target obj
  * @param {CompDisplayableConf} conf config objects
  * @returns {CompDisplayable} component for something containing bullets.
  */
@@ -90,9 +90,9 @@ export const Comp_Displayable = (base, conf) => {
 
 /**
  * @typedef {object} CompBulContConf the CompBulletContainer objects config object
- * @property {string | CALIBER} caliber caliber enum name
- * @property {number} capacity ammo capacity
- * @property {Round[] | RoundConfig[] | RoundConfig | undefined} contents array of contents bullets
+ * @prop {string | CALIBER} caliber caliber enum name
+ * @prop {number} capacity ammo capacity
+ * @prop {Round[] | RoundConfig[] | RoundConfig | undefined} contents array of contents bullets
  */
 /**
  * @typedef { {
@@ -102,13 +102,13 @@ export const Comp_Displayable = (base, conf) => {
  * LoadCheckCap(): boolean;
  * LoadCheckCal(cal: CALIBER): boolean;
  * LoadCheck(cal: CALIBER): boolean;
- * LoadAmmo(round: Round | Round[] | gunPart): number;
+ * LoadAmmo(round: Round | Round[] | GunPart): number;
  * Extract(): Round | undefined;
  * }} CompBulletContainer
  */
 /**
  * make a mag
- * @param {gunPart} base target obj
+ * @param {GunPart} base target obj
  * @param {CompBulContConf} conf config objects
  * @returns {CompBulletContainer} component for something containing bullets.
  */
@@ -156,7 +156,7 @@ export const Comp_BulletContainer = (base, conf) => {
 
     /**
      * load in ammo
-     * @param {Round | Round[] | gunPart} round
+     * @param {Round | Round[] | GunPart} round
      * @returns {number} number of how many rounds contents, -1 == all given in list
      */
     LoadAmmo(round) {
@@ -223,14 +223,14 @@ export const Comp_BulletContainer = (base, conf) => {
 
 /**
  * @typedef {object} CompBulletHoldConf grabbable config obj.
- * @property {CALIBER} caliber caliber of the barrel
- * @property {partSlot | CompBulletContainer} source source of ammunition. If mag is detachable supply the attach slot.
- * @property {Round} [heldRound] held round
+ * @prop {CALIBER} caliber caliber of the barrel
+ * @prop {PartSlot | CompBulletContainer} source source of ammunition. If mag is detachable supply the attach slot.
+ * @prop {Round} [heldRound] held round
  */
 /**
  * @typedef { {
  *  caliber: CALIBER;
- *  source: partSlot | CompBulletContainer;
+ *  source: PartSlot | CompBulletContainer;
  *  heldRound: Round | undefined;
  *  Feed(): Round | undefined;
  *  Eject(): Round | undefined;
@@ -238,7 +238,7 @@ export const Comp_BulletContainer = (base, conf) => {
  */
 /**
  * Holds a bullet
- * @param {gunPart} base
+ * @param {GunPart} base
  * @param {CompBulletHoldConf} conf
  * @returns {CompBulletHolder}
  */
@@ -253,7 +253,7 @@ export const Comp_BulletHolder = (base, conf) => {
     /**
      * source of ammunition.
      * If mag is detachable supply the attach slot.
-     * @type {partSlot | CompBulletContainer}
+     * @type {PartSlot | CompBulletContainer}
      */
     source: conf.source,
 
@@ -271,7 +271,7 @@ export const Comp_BulletHolder = (base, conf) => {
        * @type {CompBulletContainer}
        */
       let ammoSource;
-      if (this.source instanceof partSlot) ammoSource = this.source.child;
+      if (this.source instanceof PartSlot) ammoSource = this.source.child;
       else ammoSource = this.source;
 
       if (this.heldRound != undefined || !ammoSource) return;
@@ -299,10 +299,9 @@ export const Comp_BulletHolder = (base, conf) => {
 
 /**
  * @typedef {object} CompGrabConf grabbable config obj.
- * @property {(RBoxDimensions | BoxDimensions)[]} [handleDimensions] grabbable area dimenesions. leave empty for entire part.
- * @property {gunPart} [grabTarget] target of movement. leave undefind to make this components gunpart grabbale.
- * @property {HTMLElement} [restrictions] restrict movement to element dimensions.
- * @property {boolean} [grabHosted] grabbable if connected to a host. default true
+ * @prop {(RBoxDimensions | BoxDimensions)[]} [handleDimensions] grabbable area dimenesions. leave empty for entire part.
+ * @prop {GunPart} [grabTarget] target of movement. leave undefind to make this components gunpart grabbale.
+ * @prop {HTMLElement} [restrictions] restrict movement to element dimensions.
  */
 /**
  * @typedef {{
@@ -317,7 +316,7 @@ export const Comp_BulletHolder = (base, conf) => {
  * part that is grabbable by the mouse in some way.
  * a grabbable point that wont deatatch the part from the gun
  *
- * @param {gunPart} base
+ * @param {GunPart} base
  * @param {CompGrabConf} conf
  * @returns {CompGrabbable}
  */
@@ -404,7 +403,7 @@ export const Comp_Grabbable = (base, conf) => {
     pos2 = 0,
     pos3 = 0,
     pos4 = 0;
-  var button = undefined;
+  var button;
 
   var restTarget =
     conf.restrictions !== undefined
@@ -439,10 +438,8 @@ export const Comp_Grabbable = (base, conf) => {
         document.addEventListener("mousemove", elementDrag);
 
         InteractionSystem._addDraggable(base);
-
         button = ev.button;
         break;
-
       default:
         break;
     }
@@ -457,23 +454,34 @@ export const Comp_Grabbable = (base, conf) => {
     // ev.preventDefault();
 
     //check for parent drag status
-    // if (base.parent?.grabHosted !== true) {
-    //   closeDragElement(ev);
-    //   return;
-    // }
+    if (base.parent !== undefined && !base.grabHosted) {
+      closeDragElement(ev);
+      return;
+    }
 
     pos1 = ev.pageX - pos3;
     pos2 = ev.pageY - pos4;
     pos3 = ev.pageX;
     pos4 = ev.pageY;
 
+    switch (button) {
+      case 0: // left mb
+        // if can be connected
+        if (base.connectRec) {
+          // base.Attach(base.game.checkOpen(base));
+        }
+      case 2:
+        InteractionSystem.MoveElBy(
+          moveTarget,
+          pos1,
+          pos2,
+          restTarget.getBoundingClientRect()
+        );
+      default:
+        break;
+    }
+
     // set the element's new position:
-    InteractionSystem.MoveElBy(
-      moveTarget,
-      pos1,
-      pos2,
-      restTarget.getBoundingClientRect()
-    );
   }
 
   /**
@@ -489,6 +497,20 @@ export const Comp_Grabbable = (base, conf) => {
     document.removeEventListener("mousemove", elementDrag);
 
     InteractionSystem._removeDraggable(base);
+
+    switch (button) {
+      case 0: // left mb
+        // if can be connected
+        if (base.connectRec) {
+          base.Attach(base.game.checkOpen(base));
+        }
+        break;
+      case 2:
+        break;
+      default:
+        break;
+    }
+
     button = undefined;
   }
 
@@ -497,26 +519,28 @@ export const Comp_Grabbable = (base, conf) => {
 
 /**
  * @typedef {object} CompAttachableConf config obj for attachable parts
- * @prop {partSlot} [parent] parent this gun part is attached to
+ * @prop {PartSlot} [parent] parent this gun part is attached to
  * @prop {SLOTTYPE} attachType compatable attachment types
  * @prop {number} attachX attach point x axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
  * @prop {number} attachY attach point y axis position in unscaled pixels relativ to gun part base. Scale referst to the game scale.
- *
+ * @prop {BoxDimensions} connectDimensions Dimensions for the connection hit box.
+ * @prop {boolean} [grabHosted] grabbable if connected to a host. default true
  */
 /**
  * @typedef {{
- * parent: partSlot;
+ * parent: PartSlot;
  * attachType: SLOTTYPE;
  * attachX: number;
  * attachY: number;
+ * connectRec: BoxDimensions;
  * CheckAttached(): boolean;
- * Attach(target: partSlot): boolean;
+ * Attach(target: PartSlot): boolean;
  * Detach(): boolean;
  * }} CompAttachable
  */
 /**
  *
- * @param {gunPart} base target obj
+ * @param {GunPart} base target obj
  * @param {CompAttachableConf} conf
  * @returns {CompAttachable} component for making a part attachable to another.
  */
@@ -524,7 +548,7 @@ export const Comp_Attachable = (base, conf) => {
   let obj = {
     /**
      * parent this gun part is attached to
-     * @type {partSlot}
+     * @type {PartSlot}
      */
     parent: undefined,
 
@@ -549,6 +573,17 @@ export const Comp_Attachable = (base, conf) => {
     attachY: conf.attachY,
 
     /**
+     * connection rectangle. If two compatible PartSlot and CompAttachables connectRec overlap they can be connected.
+     * @type {BoxDimensions}
+     */
+    connectRec: {
+      x: conf.connectDimensions.x * base.game.Scale,
+      y: conf.connectDimensions.y * base.game.Scale,
+      w: conf.connectDimensions.w * base.game.Scale,
+      h: conf.connectDimensions.h * base.game.Scale,
+    },
+
+    /**
      * returns if attached.
      * @returns returns if attached bool.
      */
@@ -559,10 +594,12 @@ export const Comp_Attachable = (base, conf) => {
     /**
      * attach to a part slot.
      * checks attach type.
-     * @param {partSlot} target to attach to
+     * @param {PartSlot | undefined} target to attach to
      * @return {boolean} if attached successfully
      */
     Attach(target) {
+      if (target === undefined) return;
+
       if (!this.CheckAttached() && target.attachType == this.attachType) {
         if (target._attach(this)) {
           this.parent = target;
@@ -606,6 +643,17 @@ export const Comp_Attachable = (base, conf) => {
 
   base.htmlElement.classList.add(AttachableClass);
 
+  //TODO: remove debug element.
+  let debug = document.createElement("div");
+  base.htmlElement.appendChild(debug);
+
+  debug.style.backgroundColor = "rgba(0, 0, 255, 0.3)";
+  debug.style.position = "absolute";
+  debug.style.left = obj.connectRec.x + "px";
+  debug.style.top = obj.connectRec.y + "px";
+  debug.style.width = obj.connectRec.w + "px";
+  debug.style.height = obj.connectRec.h + "px";
+
   if (conf.parent) {
     obj.Attach(conf.parent);
   }
@@ -615,18 +663,18 @@ export const Comp_Attachable = (base, conf) => {
 
 /**
  * @typedef {object} CompAttHostConf properties for the component that can host attachments.
- * @property {} partSlotlist the Slots to connect parts to. Will set parent of child slots.
- * @property {partSlot[]} partSlotlist the Slots to connect parts to. Will set parent of child slots.
+ * @prop {} partSlotlist the Slots to connect parts to. Will set parent of child slots.
+ * @prop {PartSlot[]} partSlotlist the Slots to connect parts to. Will set parent of child slots.
  */
 /**
  * @typedef {{
- * partSlotlist: partSlot[];
+ * partSlotlist: PartSlot[];
  * }} CompAttachHost component for a part that can host attachments.
  */
 /**
  * component for a part that can host attachments.
  * hosts attach slots
- * @param {gunPart} base
+ * @param {GunPart} base
  * @param {CompAttHostConf} conf config objects
  * @returns {CompAttachHost}
  */
@@ -634,7 +682,7 @@ export const Comp_AttachHost = (base, conf) => {
   let obj = {
     /**
      * the parts that make up the gun
-     * @type {partSlot[]}
+     * @type {PartSlot[]}
      */
     partSlotlist: conf.partSlotlist,
 
@@ -662,7 +710,7 @@ export const Comp_AttachHost = (base, conf) => {
  */
 /**
  *
- * @param {gunPart} base target obj
+ * @param {GunPart} base target obj
  * @param {CompActionConf} conf
  * @returns component for making a part attachable to another.
  */
@@ -670,7 +718,7 @@ export const Comp_Action = (base, conf) => {
   let obj = {
     /**
      * parent this gun part is attached to
-     * @type {partSlot}
+     * @type {PartSlot}
      */
     parent: undefined,
 
@@ -683,7 +731,7 @@ export const Comp_Action = (base, conf) => {
     /**
      * attach to a part slot.
      * checks attach type.
-     * @param {partSlot} target to attach to
+     * @param {PartSlot} target to attach to
      * @return {boolean} if attached successfully
      */
     Attach(target) {

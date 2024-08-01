@@ -1,5 +1,5 @@
 import { CALIBER, SLOTTYPE } from "./js/enums.js";
-import { partSlot } from "./js/parts.js";
+import { PartSlot } from "./js/parts.js";
 import * as System from "./js/system.js";
 import MyHTML from "./myJS/MyHTML.js";
 import MyMath from "./myJS/MyMath.js";
@@ -55,12 +55,18 @@ let myFrame = System.GunFactory.Make_FrameGrip(
   {
     partSlotlist: [
       //mag
-      new partSlot({
+      new PartSlot({
         attachX: 38,
         attachY: 2,
         zIndex: -1,
         detachable: true,
         attachType: SLOTTYPE.PistolMag,
+        connectDimensions: {
+          x: 42,
+          y: 5,
+          w: 6,
+          h: 10,
+        },
         child: System.GunFactory.Make_Magazine(
           {
             game: Game,
@@ -85,14 +91,26 @@ let myFrame = System.GunFactory.Make_FrameGrip(
             attachType: SLOTTYPE.PistolMag,
             attachX: 0,
             attachY: 0,
+            connectDimensions: {
+              x: 4,
+              y: -2,
+              w: 2,
+              h: 7,
+            },
           }
         ),
       }),
       //slide
-      new partSlot({
+      new PartSlot({
         attachX: 56,
         attachY: -1,
         zIndex: 1,
+        connectDimensions: {
+          x: 25,
+          y: -3,
+          w: 13,
+          h: 6,
+        },
         child: System.GunFactory.Make_PistolSlide(
           {
             game: Game,
@@ -100,10 +118,7 @@ let myFrame = System.GunFactory.Make_FrameGrip(
           },
           { imgSrc: "assets/G18C_Tan_Slide.png" },
           {
-            partSlotlist: [],
-          },
-          {
-            grabHosted: true,
+            grabHosted: false,
             handleDimensions: [
               {
                 x: 38,
@@ -117,29 +132,50 @@ let myFrame = System.GunFactory.Make_FrameGrip(
             attachType: SLOTTYPE.PistolBarrel,
             attachX: 56,
             attachY: 7,
+            connectDimensions: {
+              x: 25,
+              y: 7,
+              w: 13,
+              h: 1,
+            },
           },
-          { caliber: CALIBER.CAL9, source: undefined }
-        ),
-      }),
-      //barrel
-      new partSlot({
-        attachX: 37,
-        attachY: -4,
-        child: System.GunFactory.Make_Attachable(
+          { caliber: CALIBER.CAL9, source: undefined },
           {
-            game: Game,
-            modelName: "G18C Barrel Standart",
-          },
-          {
-            imgSrc: "assets/G18C_BarrelStandart.png",
-          },
-          {
-            attachType: SLOTTYPE.PistolBarrel,
-            attachX: 38,
-            attachY: 1,
+            partSlotlist: [],
           }
         ),
       }),
+      //barrel
+      // new PartSlot({
+      //   attachX: 37,
+      //   attachY: -4,
+      //   connectDimensions: {
+      //     x: 0,
+      //     y: 0,
+      //     w: 10,
+      //     h: 10,
+      //   },
+      //   child: System.GunFactory.Make_Attachable(
+      //     {
+      //       game: Game,
+      //       modelName: "G18C Barrel Standart",
+      //     },
+      //     {
+      //       imgSrc: "assets/G18C_BarrelStandart.png",
+      //     },
+      //     {
+      //       attachType: SLOTTYPE.PistolBarrel,
+      //       attachX: 38,
+      //       attachY: 1,
+      //       connectDimensions: {
+      //         x: 0,
+      //         y: 0,
+      //         w: 10,
+      //         h: 10,
+      //       },
+      //     }
+      //   ),
+      // }),
     ],
   },
   {

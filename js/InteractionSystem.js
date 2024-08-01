@@ -1,6 +1,6 @@
 import MyArr from "../myJS/MyArr.js";
 import MyMath from "../myJS/MyMath.js";
-import { gunPart } from "./parts.js";
+import { GunPart } from "./parts.js";
 import * as Composition from "./composition.js";
 
 function Implication(A, B) {
@@ -17,7 +17,7 @@ function Implication(A, B) {
 export default class InteractionSystem {
   /**
    * Array of dragged items.
-   * @type {gunPart & Composition.CompGrabbable[]}
+   * @type {GunPart & Composition.CompGrabbable[]}
    */
   static _dragArr = [];
 
@@ -105,23 +105,23 @@ export default class InteractionSystem {
 
   /**
    * adds target as draged instance.
-   * @param {gunPart & Composition.CompGrabbable} any
+   * @param {GunPart & Composition.CompGrabbable} gunPart
    */
-  static _addDraggable(any) {
-    this._dragArr.push(any);
+  static _addDraggable(gunPart) {
+    this._dragArr.push(gunPart);
   }
 
   /**
    *
-   * @param {gunPart & Composition.CompGrabbable} any
+   * @param {GunPart & Composition.CompGrabbable} gunPart
    */
-  static _removeDraggable(any) {
-    MyArr.removeEntry(this._dragArr, any);
+  static _removeDraggable(gunPart) {
+    MyArr.removeEntry(this._dragArr, gunPart);
   }
 
   /**
    * retruns managed list of dragged HTMLElements.
-   * @returns {gunPart & Composition.CompGrabbable[]}
+   * @returns {GunPart & Composition.CompGrabbable[]}
    */
   static GetDraggedObjs() {
     return this._dragArr;
