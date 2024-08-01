@@ -55,56 +55,57 @@ let myFrame = System.GunFactory.Make_FrameGrip(
   {
     partSlotlist: [
       //mag
-      new PartSlot({
-        attachX: 38,
-        attachY: 2,
-        zIndex: -1,
-        detachable: true,
-        attachType: SLOTTYPE.PistolMag,
-        connectDimensions: {
-          x: 42,
-          y: 5,
-          w: 6,
-          h: 10,
-        },
-        child: System.GunFactory.Make_Magazine(
-          {
-            game: Game,
-            modelName: "G-Type Pistol Magazine 17.",
-          },
-          {
-            imgSrc: "assets/Gmag_17.png",
-          },
-          {
-            handleDimensions: [
-              {
-                cx: 9.5, // 21
-                cy: 15, // 31
-                w: 10,
-                h: 32,
-                rot: -22,
-              },
-            ],
-          },
-          { caliber: CALIBER.CAL9 },
-          {
-            attachType: SLOTTYPE.PistolMag,
-            attachX: 0,
-            attachY: 0,
-            connectDimensions: {
-              x: 4,
-              y: -2,
-              w: 2,
-              h: 7,
-            },
-          }
-        ),
-      }),
+      // new PartSlot({
+      //   attachX: 37,
+      //   attachY: -1,
+      //   zIndex: -1,
+      //   detachable: true,
+      //   attachType: SLOTTYPE.PistolMag,
+      //   connectDimensions: {
+      //     x: 41,
+      //     y: 1,
+      //     w: 7,
+      //     h: 10,
+      //   },
+      //   child: System.GunFactory.Make_Magazine(
+      //     {
+      //       game: Game,
+      //       modelName: "G-Type Pistol Magazine 17.",
+      //     },
+      //     {
+      //       imgSrc: "assets/Gmag_17.png",
+      //     },
+      //     {
+      //       handleDimensions: [
+      //         {
+      //           cx: 10.5, // 22
+      //           cy: 17.5, // 34
+      //           w: 10,
+      //           h: 36,
+      //           rot: -22,
+      //         },
+      //       ],
+      //     },
+      //     { caliber: CALIBER.CAL9 },
+      //     {
+      //       attachType: SLOTTYPE.PistolMag,
+      //       attachX: 0,
+      //       attachY: 0,
+      //       connectDimensions: {
+      //         x: 4,
+      //         y: -2,
+      //         w: 2,
+      //         h: 7,
+      //       },
+      //     }
+      //   ),
+      // }),
       //slide
       new PartSlot({
         attachX: 56,
         attachY: -1,
         zIndex: 1,
+        attachType: SLOTTYPE.PistolBarrel,
         connectDimensions: {
           x: 25,
           y: -3,
@@ -118,7 +119,7 @@ let myFrame = System.GunFactory.Make_FrameGrip(
           },
           { imgSrc: "assets/G18C_Tan_Slide.png" },
           {
-            grabHosted: false,
+            grabHosted: true,
             handleDimensions: [
               {
                 x: 38,
@@ -147,13 +148,14 @@ let myFrame = System.GunFactory.Make_FrameGrip(
       }),
       //barrel
       // new PartSlot({
-      //   attachX: 37,
+      //   attachType: SLOTTYPE.PistolBarrel,
+      //   attachX: 34,
       //   attachY: -4,
       //   connectDimensions: {
-      //     x: 0,
-      //     y: 0,
-      //     w: 10,
-      //     h: 10,
+      //     x: 24,
+      //     y: -6,
+      //     w: 11,
+      //     h: 5,
       //   },
       //   child: System.GunFactory.Make_Attachable(
       //     {
@@ -165,13 +167,47 @@ let myFrame = System.GunFactory.Make_FrameGrip(
       //     },
       //     {
       //       attachType: SLOTTYPE.PistolBarrel,
-      //       attachX: 38,
+      //       attachX: 35,
+      //       attachY: 2,
+      //       connectDimensions: {
+      //         x: 25,
+      //         y: 0,
+      //         w: 11,
+      //         h: 5,
+      //       },
+      //     }
+      //   ),
+      // }),
+      //trigger
+      // new PartSlot({
+      //   attachType: SLOTTYPE.PistolBarrel,
+      //   attachX: 31,
+      //   attachY: 2,
+      //   zIndex: -1,
+      //   connectDimensions: {
+      //     x: 30,
+      //     y: 1,
+      //     w: 3,
+      //     h: 3,
+      //   },
+      //   child: System.GunFactory.Make_Attachable(
+      //     {
+      //       game: Game,
+      //       modelName: "G18C Trigger",
+      //     },
+      //     {
+      //       imgSrc: "assets/G18C_Trigger.png",
+      //     },
+      //     {
+      //       attachType: SLOTTYPE.PistolTrigger,
+      //       attachType: SLOTTYPE.PistolBarrel,
+      //       attachX: 1,
       //       attachY: 1,
       //       connectDimensions: {
       //         x: 0,
       //         y: 0,
-      //         w: 10,
-      //         h: 10,
+      //         w: 3,
+      //         h: 3,
       //       },
       //     }
       //   ),
@@ -196,23 +232,6 @@ let myFrame = System.GunFactory.Make_FrameGrip(
 //   20,
 //   20
 // );
-
-console.log(
-  MyMath.recCollide(
-    {
-      top: 10,
-      bottom: 20,
-      left: 10,
-      right: 20,
-    },
-    {
-      top: 12,
-      bottom: 18,
-      left: 12,
-      right: 18,
-    }
-  )
-);
 
 myFrame.imgLoadPromise.finally(() => {
   console.log(myFrame.Width, myFrame.htmlDisplayElement.style.width);

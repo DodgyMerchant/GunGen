@@ -29,14 +29,16 @@ export class CALIBER extends MyEnum {
   }
 }
 export class SLOTTYPE extends MyEnum {
+  //general
   static PistolSlide = new SLOTTYPE("stPistolSlide", "pistol slide");
-  static PistolBolt = new SLOTTYPE("stPistolBolt", "pistol bolt");
-  static PistolGrip = new SLOTTYPE("stPistolGrip", "pistol grip");
+  // static PistolBolt = new SLOTTYPE("stPistolBolt", "pistol bolt");
+  // static PistolGrip = new SLOTTYPE("stPistolGrip", "pistol grip");
   static PistolMag = new SLOTTYPE("stPistolMagazine", "pistol magazine");
   static PistolBarrel = new SLOTTYPE("stPistolBarrel", "pistol barrel");
   static PistolSlideStop = new SLOTTYPE("stPistolMagazine", "pistol magazine");
   static PistolSelector = new SLOTTYPE("stPistolFireSelector", "pistol fire selector");
   static PistolHammer = new SLOTTYPE("stPistolHammer", "pistol hammer");
+  static PistolTrigger = new SLOTTYPE("stPistolTrigger", "pistol trugger");
   static PistolMagRelease = new SLOTTYPE("stPistolMagazineRelease", "pistol magazine release");
   static PistolTacModule = new SLOTTYPE("stPistolTacticalModule", "pistol tactical module");
 
