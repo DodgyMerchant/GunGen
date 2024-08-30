@@ -42,6 +42,8 @@ if left empty no target will be given and functionality ignored/not setup.
 TODO: give attachable component own intput box like grabbable. Split functionality.
 TODO: combin the gab and attach component like you do with components already.
 TODO: change the GRAB system to an interact system.
+
+TODO: figure out double event bug. first drag function cannot be removed?
 */
 
 let myFrame = System.GunFactory.Make_FrameGrip(
@@ -99,115 +101,115 @@ let myFrame = System.GunFactory.Make_FrameGrip(
         ),
       }),
       //slide
-      new PartSlot({
-        attachX: 56,
-        attachY: -1,
-        zIndex: 1,
-        attachType: SLOTTYPE.PistolBarrel,
-        connectDimensions: {
-          x: 25,
-          y: -3,
-          w: 13,
-          h: 6,
-        },
-        child: System.GunFactory.Make_PistolSlide(
-          {
-            game: Game,
-            modelName: "G17C Top Slide Tan",
-          },
-          { imgSrc: "assets/G18C_Tan_Slide.png" },
-          {
-            attachType: SLOTTYPE.PistolBarrel,
-            attachX: 56,
-            attachY: 7,
-            connectDimensions: {
-              x: 25,
-              y: 7,
-              w: 13,
-              h: 1,
-            },
-            grabHosted: true,
-            handleDimensions: [
-              {
-                x: 38,
-                y: 1,
-                w: 19,
-                h: 7,
-              },
-            ],
-          },
-          { caliber: CALIBER.CAL9, source: undefined },
-          {
-            partSlotlist: [],
-          }
-        ),
-      }),
+      // new PartSlot({
+      //   attachX: 56,
+      //   attachY: -1,
+      //   zIndex: 1,
+      //   attachType: SLOTTYPE.PistolBarrel,
+      //   connectDimensions: {
+      //     x: 25,
+      //     y: -3,
+      //     w: 13,
+      //     h: 6,
+      //   },
+      //   child: System.GunFactory.Make_PistolSlide(
+      //     {
+      //       game: Game,
+      //       modelName: "G17C Top Slide Tan",
+      //     },
+      //     { imgSrc: "assets/G18C_Tan_Slide.png" },
+      //     {
+      //       attachType: SLOTTYPE.PistolBarrel,
+      //       attachX: 56,
+      //       attachY: 7,
+      //       connectDimensions: {
+      //         x: 25,
+      //         y: 7,
+      //         w: 13,
+      //         h: 1,
+      //       },
+      //       grabHosted: true,
+      //       handleDimensions: [
+      //         {
+      //           x: 38,
+      //           y: 1,
+      //           w: 19,
+      //           h: 7,
+      //         },
+      //       ],
+      //     },
+      //     { caliber: CALIBER.CAL9, source: undefined },
+      //     {
+      //       partSlotlist: [],
+      //     }
+      //   ),
+      // }),
       //barrel
-      new PartSlot({
-        attachType: SLOTTYPE.PistolBarrel,
-        attachX: 34,
-        attachY: -4,
-        connectDimensions: {
-          x: 24,
-          y: -6,
-          w: 11,
-          h: 5,
-        },
-        child: System.GunFactory.Make_Attachable(
-          {
-            game: Game,
-            modelName: "G18C Barrel Standart",
-          },
-          {
-            imgSrc: "assets/G18C_BarrelStandart.png",
-          },
-          {
-            attachType: SLOTTYPE.PistolBarrel,
-            attachX: 35,
-            attachY: 2,
-            connectDimensions: {
-              x: 25,
-              y: 0,
-              w: 11,
-              h: 5,
-            },
-          }
-        ),
-      }),
+      // new PartSlot({
+      //   attachType: SLOTTYPE.PistolBarrel,
+      //   attachX: 34,
+      //   attachY: -4,
+      //   connectDimensions: {
+      //     x: 24,
+      //     y: -6,
+      //     w: 11,
+      //     h: 5,
+      //   },
+      //   child: System.GunFactory.Make_Attachable(
+      //     {
+      //       game: Game,
+      //       modelName: "G18C Barrel Standart",
+      //     },
+      //     {
+      //       imgSrc: "assets/G18C_BarrelStandart.png",
+      //     },
+      //     {
+      //       attachType: SLOTTYPE.PistolBarrel,
+      //       attachX: 35,
+      //       attachY: 2,
+      //       connectDimensions: {
+      //         x: 25,
+      //         y: 0,
+      //         w: 11,
+      //         h: 5,
+      //       },
+      //     }
+      //   ),
+      // }),
       //trigger
-      new PartSlot({
-        attachType: SLOTTYPE.PistolBarrel,
-        attachX: 31,
-        attachY: 2,
-        zIndex: -1,
-        connectDimensions: {
-          x: 30,
-          y: 1,
-          w: 3,
-          h: 3,
-        },
-        child: System.GunFactory.Make_Attachable(
-          {
-            game: Game,
-            modelName: "G18C Trigger",
-          },
-          {
-            imgSrc: "assets/G18C_Trigger.png",
-          },
-          {
-            attachType: SLOTTYPE.PistolTrigger,
-            attachType: SLOTTYPE.PistolBarrel,
-            attachX: 1,
-            attachY: 1,
-            connectDimensions: {
-              x: 0,
-              y: 0,
-              w: 3,
-              h: 3,
-            },
-          }
-        ),
-      }),
+      // new PartSlot({
+      //   attachType: SLOTTYPE.PistolBarrel,
+      //   attachX: 31,
+      //   attachY: 2,
+      //   zIndex: -1,
+      //   connectDimensions: {
+      //     x: 30,
+      //     y: 1,
+      //     w: 3,
+      //     h: 3,
+      //   },
+      //   child: System.GunFactory.Make_Attachable(
+      //     {
+      //       game: Game,
+      //       modelName: "G18C Trigger",
+      //     },
+      //     {
+      //       imgSrc: "assets/G18C_Trigger.png",
+      //     },
+      //     {
+      //       attachType: SLOTTYPE.PistolTrigger,
+      //       attachType: SLOTTYPE.PistolBarrel,
+      //       attachX: 1,
+      //       attachY: 1,
+      //       connectDimensions: {
+      //         x: 0,
+      //         y: 0,
+      //         w: 3,
+      //         h: 3,
+      //       },
+      //     }
+      //   ),
+      // }),
     ],
   },
   {
@@ -224,7 +226,7 @@ let myFrame = System.GunFactory.Make_FrameGrip(
 );
 
 // Game.addGunPart(
-
+//   ,
 //   20,
 //   20
 // );

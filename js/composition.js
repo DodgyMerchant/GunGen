@@ -301,7 +301,6 @@ export const Comp_BulletHolder = (base, conf) => {
 /**
  * @typedef {object} CompGrabConf grabbable config obj.
  * @prop {(RBoxDimensions | BoxDimensions)[]} [handleDimensions] grabbable area dimenesions. leave empty for entire part.
- * @prop {GunPart} [grabTarget] target of movement. leave undefind to make this components gunpart grabbale.
  * @prop {HTMLElement} [restrictions] restrict movement to element dimensions.
  */
 /**
@@ -319,9 +318,10 @@ export const Comp_BulletHolder = (base, conf) => {
  *
  * @param {GunPart} base
  * @param {CompGrabConf} conf
+ * @param {boolean} makeInteractable
  * @returns {CompGrabbable}
  */
-export const Comp_Grabbable = (base, conf) => {
+export const Comp_Grabbable = (base, conf, makeInteractable = true) => {
   let obj = {
     /**
      * @type {HTMLElement[]}
@@ -331,10 +331,11 @@ export const Comp_Grabbable = (base, conf) => {
     /**
      * grabbable if connected to a host.
      */
-    grabHosted: conf.grabHosted ? conf.grabHosted : false,
+    grabHosted: conf.grabHosted ?? false,
 
     /**
      * is grabbed right now
+     * @this {GunPart & CompGrabbable}
      */
     grabCheck() {
       return InteractionSystem.GetDraggedObjs().indexOf(this.htmlElement) != -1;
@@ -342,6 +343,7 @@ export const Comp_Grabbable = (base, conf) => {
 
     /**
      * gives the given grab element the given dimensions.
+     * @this {GunPart & CompGrabbable}
      * @param {HTMLDivElement} element
      * @param {BoxDimensions} dimensions
      */
@@ -354,6 +356,7 @@ export const Comp_Grabbable = (base, conf) => {
 
     /**
      * gives the given grab element the given dimensions.
+     * @this {GunPart & CompGrabbable}
      * @param {HTMLDivElement} element
      * @param {RBoxDimensions} dimensions
      */
@@ -369,12 +372,10 @@ export const Comp_Grabbable = (base, conf) => {
   };
 
   // make target grabbable
-  let moveTarget = conf.grabTarget
-    ? conf.grabTarget.htmlElement
-    : base.htmlElement;
+  // let moveTarget = conf.grabTarget?.htmlElement ?? base.htmlElement;
 
   // make target grabbable
-  moveTarget.classList.add(GrabTargetClass);
+  base.htmlElement.classList.add(GrabTargetClass);
 
   // set grabHost
   if (typeof conf.grabHost !== "undefined") obj.grabHost = conf.grabHost;
@@ -400,119 +401,98 @@ export const Comp_Grabbable = (base, conf) => {
     base.htmlElement.classList.add(GrabSourceClass);
   }
 
-  var pos1 = 0,
-    pos2 = 0,
-    pos3 = 0,
-    pos4 = 0;
-  var button;
+  if (makeInteractable) {
+    var pos1 = 0,
+      pos2 = 0,
+      pos3 = 0,
+      pos4 = 0;
+    var button;
 
-  var restTarget =
-    conf.restrictions !== undefined
-      ? conf.restrictions
-      : base.game.GameSpace.HtmlElement;
+    var restTarget = conf.restrictions ?? base.game.GameSpace.HtmlElement;
 
-  InteractionSystem.MakeElementInteractable(
-    dragMouseDown,
-    moveTarget,
-    obj.htmlGrabElement
-  );
+    InteractionSystem.MakeElementInteractable(
+      dragMouseDown,
+      base.htmlElement,
+      obj.htmlGrabElement
+    );
 
-  /**
-   *
-   * @param {MouseEvent} ev
-   */
-  function dragMouseDown(ev) {
-    ev = ev || window.event;
-    // ev.preventDefault();
-    console.log("here 1");
-    switch (ev.button) {
-      case 2: // right mb
-        if (base.parent?.detachable !== true) {
+    /**
+     *
+     * @param {MouseEvent} ev
+     */
+    function dragMouseDown(ev) {
+      ev = ev || window.event;
+
+      switch (ev.button) {
+        case 0: // left mb
+          pos3 = ev.pageX;
+          pos4 = ev.pageY;
+
+          document.addEventListener("mouseup", closeDragElement);
+          document.addEventListener("mousemove", elementDrag);
+
+          InteractionSystem._addDraggable(base);
+          button = ev.button;
           break;
-        }
-        base.Detach();
-      case 0: // left mb
-        pos3 = ev.pageX;
-        pos4 = ev.pageY;
-
-        document.addEventListener("mouseup", closeDragElement);
-        document.addEventListener("mousemove", elementDrag);
-
-        InteractionSystem._addDraggable(base);
-        button = ev.button;
-        break;
-      default:
-        break;
-    }
-  }
-
-  /**
-   *
-   * @param {MouseEvent} ev
-   */
-  function elementDrag(ev) {
-    ev = ev || window.event;
-    // ev.preventDefault();
-
-    //check for parent drag status
-    if (base.parent !== undefined && !base.grabHosted) {
-      closeDragElement(ev);
-      return;
+        default:
+          break;
+      }
     }
 
-    pos1 = ev.pageX - pos3;
-    pos2 = ev.pageY - pos4;
-    pos3 = ev.pageX;
-    pos4 = ev.pageY;
+    /**
+     *
+     * @param {MouseEvent} ev
+     */
+    function elementDrag(ev) {
+      ev = ev || window.event;
 
-    switch (button) {
-      case 0: // left mb
-        // if can be connected
-        if (base.connectRec) {
-          // base.Attach(base.game.checkOpen(base));
-        }
-      case 2:
-        InteractionSystem.MoveElBy(
-          moveTarget,
-          pos1,
-          pos2,
-          restTarget.getBoundingClientRect()
-        );
-      default:
-        break;
+      pos1 = ev.pageX - pos3;
+      pos2 = ev.pageY - pos4;
+      pos3 = ev.pageX;
+      pos4 = ev.pageY;
+
+      switch (ev.button) {
+        case 0:
+          InteractionSystem.MoveElBy(
+            base.htmlElement,
+            pos1,
+            pos2,
+            restTarget.getBoundingClientRect()
+          );
+        default:
+          break;
+      }
+
+      // set the element's new position:
     }
 
-    // set the element's new position:
-  }
+    /**
+     *
+     * @param {MouseEvent} ev
+     */
+    function closeDragElement(ev) {
+      // stop moving when mouse button is released:
 
-  /**
-   *
-   * @param {MouseEvent} ev
-   */
-  function closeDragElement(ev) {
-    // stop moving when mouse button is released:
+      if (ev.button != button) return;
 
-    if (ev.button != button) return;
+      document.removeEventListener("mouseup", closeDragElement);
+      document.removeEventListener("mousemove", elementDrag);
 
-    document.removeEventListener("mouseup", closeDragElement);
-    document.removeEventListener("mousemove", elementDrag);
+      InteractionSystem._removeDraggable(base);
 
-    InteractionSystem._removeDraggable(base);
+      switch (button) {
+        case 0: // left mb
+          // if can be connected
+          if (base.connectRec) {
+            base.Attach(base.game.checkOpen(base));
+          }
+          break;
+        default:
+          break;
+      }
 
-    switch (button) {
-      case 0: // left mb
-        // if can be connected
-        if (base.connectRec) {
-          base.Attach(base.game.checkOpen(base));
-        }
-        break;
-      case 2:
-        break;
-      default:
-        break;
+      button = undefined;
     }
-
-    button = undefined;
   }
 
   return obj;
@@ -537,6 +517,8 @@ export const Comp_Grabbable = (base, conf) => {
  * attachX: number;
  * attachY: number;
  * connectRec: BoxDimensions;
+ * dragFunc: (ev: MouseEvent) => void;
+ * disconnectFunc: (ev: MouseEvent) => void;
  * CheckAttached(): boolean;
  * Attach(target: PartSlot | undefined): boolean;
  * Detach(): boolean;
@@ -549,7 +531,9 @@ export const Comp_Grabbable = (base, conf) => {
  * @returns {CompAttachable} component for making a part attachable to another.
  */
 export const Comp_Attachable = (base, conf) => {
-  let obj = Object.assign(Comp_Grabbable(base, conf), {
+  //check for parent drag status
+
+  let obj = Object.assign(Comp_Grabbable(base, conf, false), {
     /**
      * parent this gun part is attached to
      * @type {PartSlot}
@@ -588,7 +572,20 @@ export const Comp_Attachable = (base, conf) => {
     },
 
     /**
+     *
+     * @param {MouseEvent} ev
+     */
+    dragFunc: dragMouseDown,
+
+    /**
+     *
+     * @param {MouseEvent} ev
+     */
+    disconnectFunc: disconnectFunc,
+
+    /**
      * returns if attached.
+     * @this {GunPart & CompAttachable}
      * @returns returns if attached bool.
      */
     CheckAttached() {
@@ -598,6 +595,7 @@ export const Comp_Attachable = (base, conf) => {
     /**
      * attach to a part slot.
      * checks attach type.
+     * @this {GunPart & CompAttachable}
      * @param {PartSlot | undefined} target to attach to
      * @return {boolean} if attached successfully
      */
@@ -608,8 +606,17 @@ export const Comp_Attachable = (base, conf) => {
         if (target._attach(this)) {
           this.parent = target;
 
+          console.log(
+            `connected: \"${this.toString()}\" with: \"${this.parent.parent.toString()}\"`
+          );
+
           // ----- html ------
           this.parent.parent.htmlElement.appendChild(this.htmlElement);
+
+          console.log("removeEventListener dragFunc");
+          this.htmlElement.removeEventListener("mousedown", this.dragFunc);
+          console.log("addEventListener disconnectFunc");
+          this.htmlElement.addEventListener("mousedown", this.disconnectFunc);
 
           // move position to attach x/y
           this.htmlElement.style.top =
@@ -619,9 +626,6 @@ export const Comp_Attachable = (base, conf) => {
 
           this.zIndex = this.parent.zIndex;
 
-          console.log(
-            `connected: \"${this.toString()}\" with: \"${this.parent.parent.toString()}\"`
-          );
           return true;
         }
       }
@@ -630,13 +634,19 @@ export const Comp_Attachable = (base, conf) => {
     },
 
     /**
-     *
+     * @this {GunPart & CompAttachable}
      */
     Detach() {
       if (this.CheckAttached() && this.parent._detach(this)) {
         console.log(
           `detached: \"${this.toString()}\" with: \"${this.parent.parent.toString()}\"`
         );
+
+        console.log("removeEventListener disconnectFunc");
+        this.htmlElement.removeEventListener("mousedown", this.disconnectFunc);
+        console.log("addEventListener dragFunc");
+        this.htmlElement.addEventListener("mousedown", this.dragFunc);
+
         this.game.detatch(this);
         this.parent = undefined;
         return true;
@@ -659,8 +669,124 @@ export const Comp_Attachable = (base, conf) => {
   debug.style.height = obj.connectRec.h + "px";
   //debug end
 
-  if (conf.parent) {
-    obj.Attach(conf.parent);
+  InteractionSystem.MakeElementInteractable(
+    obj.dragFunc,
+    base.htmlElement,
+    obj.htmlGrabElement
+  );
+
+  if (conf.parent) obj.Attach(conf.parent);
+
+  //anonymous functions
+  var pos1 = 0,
+    pos2 = 0,
+    pos3 = 0,
+    pos4 = 0;
+  var button;
+
+  var restTarget = conf.restrictions ?? base.game.GameSpace.HtmlElement;
+
+  /**
+   *
+   * @param {MouseEvent} ev
+   */
+  function disconnectFunc(ev) {
+    ev = ev || window.event;
+
+    console.log("Comp_Attachable disconnectFunc");
+
+    switch (ev.button) {
+      case 2: // right mb
+        if (base.parent?.detachable !== true) {
+          break;
+        }
+        base.Detach();
+      default:
+        break;
+    }
+  }
+
+  /**
+   *
+   * @param {MouseEvent} ev
+   */
+  function dragMouseDown(ev) {
+    ev = ev || window.event;
+
+    console.log("Comp_Attachable dragMouseDown");
+
+    switch (ev.button) {
+      case 2: // right mb
+      case 0: // left mb
+        pos3 = ev.pageX;
+        pos4 = ev.pageY;
+
+        document.addEventListener("mouseup", closeDragElement);
+        document.addEventListener("mousemove", elementDrag);
+
+        InteractionSystem._addDraggable(base);
+        button = ev.button;
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   *
+   * @param {MouseEvent} ev
+   */
+  function elementDrag(ev) {
+    ev = ev || window.event;
+
+    pos1 = ev.pageX - pos3;
+    pos2 = ev.pageY - pos4;
+    pos3 = ev.pageX;
+    pos4 = ev.pageY;
+
+    switch (ev.button) {
+      case 0: // left mb
+      case 2: // right mb
+        InteractionSystem.MoveElBy(
+          base.htmlElement,
+          pos1,
+          pos2,
+          restTarget.getBoundingClientRect()
+        );
+      default:
+        break;
+    }
+
+    // set the element's new position:
+  }
+
+  /**
+   *
+   * @param {MouseEvent} ev
+   */
+  function closeDragElement(ev) {
+    // stop moving when mouse button is released:
+
+    if (ev.button != button) return;
+
+    document.removeEventListener("mouseup", closeDragElement);
+    document.removeEventListener("mousemove", elementDrag);
+
+    InteractionSystem._removeDraggable(base);
+
+    switch (button) {
+      case 0: // left mb
+      case 2: // right mb
+        // if can be connected
+        if (base.connectRec) {
+          base.Attach(base.game.checkOpen(base));
+        }
+        break;
+      default:
+        break;
+    }
+
+    button = undefined;
   }
 
   return obj;

@@ -3,14 +3,6 @@ import MyMath from "../myJS/MyMath.js";
 import { GunPart } from "./parts.js";
 import * as Composition from "./composition.js";
 
-function Implication(A, B) {
-  if (A) {
-    return B;
-  } else {
-    /* if A is false, the implication is true */ return true;
-  }
-}
-
 /**
  * custom Interaction System.
  */
@@ -91,6 +83,7 @@ export default class InteractionSystem {
     interactionTargets
   ) {
     interactionTargets.forEach((element) => {
+      console.log("addEventListener pressFunction");
       element.addEventListener("mousedown", pressFunction);
     });
     // document.onmouseup = closeDragElement.bind(document, [this]);
